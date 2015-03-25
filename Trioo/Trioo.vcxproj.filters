@@ -14,4 +14,17 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="TriooMain.asm">
+      <Filter>源文件</Filter>
+    </MASM>
+    <MASM Include="GlobalVars.asm">
+      <Filter>源文件</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GlobalVars.inc">
+      <Filter>头文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>
