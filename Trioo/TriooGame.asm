@@ -1,24 +1,18 @@
 TITLE TriooGame.asm
-.386
-.model flat, STDCALL
 
+INCLUDE Irvine32.inc
 INCLUDE TriooGame.inc
 
 PUBLIC game
-.data
-	PARA_A = 1
-	PARA_B = 2
-	PARA_C = 3
-	PARA_P = 7
-	
+.data	
+	diameter EQU 47
 	game Game <>
-	score DWORD ?
-	randomSeed DWORD ?
 
 .code
 startGame PROC
 	mov game.plankPosition, 0
 	mov game.score, 0
+	call Randomize
 	mov ecx, MAX_NUM
 	mov edi, 0
 L1:
@@ -29,7 +23,7 @@ startGame ENDP
 
 step PROC USES edi
 	mov edi, 0
-L2: 
+L2:
 	cmp game.ball.existed[edi], 0
 	je L3
 L3:
@@ -38,14 +32,6 @@ L3:
 	jb L2
 	ret
 step ENDP
-
-srand PROC, seed: DWORD
-	ret
-srand ENDP
-
-rand PROC USES edx
-	ret
-rand ENDP
 
 generateBall PROC USES edi esi
 	ret

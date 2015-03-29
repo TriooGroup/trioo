@@ -19,6 +19,8 @@ INCLUDE TriooGame.inc
 .data
 WindowName BYTE "TriooName"
 className BYTE "Trioo", 0
+SCREEN_X = 1104
+SCREEN_Y = 621
 MainWin WNDCLASS <>
 msg MSG <>
 hInstance DWORD ?
@@ -26,8 +28,11 @@ rect RECT <>
 TotalRect DWORD ?
 hWnd DWORD ?
 hFinalDC dd ?
+hDC dd ?
 
+BitmapBuffer dd ?
 BitmapBackground dd ?
+BackgroundFilePath BYTE "bgImg.bmp", 0
 extern game: Game
 .code
 InitInstance PROC
@@ -55,8 +60,8 @@ InitInstance PROC
 	.ENDIF	
 	;创建应用程序主窗口
 	
-	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1000,
-				630, NULL, NULL, hInstance, NULL
+	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, SCREEN_X,
+				SCREEN_Y, NULL, NULL, hInstance, NULL
 	.IF eax == 0
 		;call ErrorHandler
 		jmp Exit_Program
@@ -64,6 +69,12 @@ InitInstance PROC
 		mov hWnd, eax;
 	.ENDIF	
 	
+	INVOKE GetDC, hWnd
+	mov hFinalDC, eax
+	INVOKE LoadImage, NULL, ADDR BackgroundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov BitmapBackground, eax
+	INVOKE CreateCompatibleDC, hFinalDC
+	mov hDC, eax
 	INVOKE ShowWindow, hWnd, SW_SHOW
 	INVOKE UpdateWindow, hWnd
 	ret
@@ -80,6 +91,11 @@ SAVE:
 		.ELSEIF localMsg == WM_TIMER
 			;jmp WndProcExit
 		.ELSEIF localMsg == WM_PAINT
+			INVOKE BeginPaint, lhwnd, ADDR ps
+			mov hFinalDC, eax
+			INVOKE SelectObject, hDC, BitmapBackground
+			INVOKE BitBlt, hFinalDC, 0, 0, SCREEN_X, SCREEN_Y, hDC, 0, 0, SRCCOPY
+			INVOKE EndPaint, lhwnd, ADDR ps
 			jmp WndProcExit
 		.ELSEIF localMsg == WM_KEYDOWN
 			jmp WndProcExit
