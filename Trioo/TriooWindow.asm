@@ -19,20 +19,36 @@ INCLUDE TriooGame.inc
 .data
 WindowName BYTE "TriooName"
 className BYTE "Trioo", 0
-SCREEN_X = 1104
-SCREEN_Y = 621
 MainWin WNDCLASS <>
 msg MSG <>
 hInstance DWORD ?
 rect RECT <>
 TotalRect DWORD ?
 hWnd DWORD ?
+
 hFinalDC dd ?
 hDC dd ?
+hMemDC dd ?
 
-BitmapBuffer dd ?
-BitmapBackground dd ?
-BackgroundFilePath BYTE "bgImg.bmp", 0
+SCREEN_X = 1120
+SCREEN_Y = 660
+PLANK_X1 = 24
+PLANK_X2 = 392
+PLANK_X3 = 760
+PLANK_Y = 496
+
+hBuffer dd ?
+hBackground dd ?
+hPlank dd ?
+hYellowDot dd ?
+
+BufferFilePath BYTE "pic\buffer.bmp", 0
+BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
+NormalPlankFilePath BYTE "pic\trio_key_white.bmp", 0
+YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
+
+TempScore BYTE "2304", 0
+
 extern game: Game
 .code
 InitInstance PROC
@@ -58,8 +74,8 @@ InitInstance PROC
 		;call ErrorHandler
 		jmp Exit_Program
 	.ENDIF	
+
 	;创建应用程序主窗口
-	
 	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, SCREEN_X,
 				SCREEN_Y, NULL, NULL, hInstance, NULL
 	.IF eax == 0
@@ -71,10 +87,13 @@ InitInstance PROC
 	
 	INVOKE GetDC, hWnd
 	mov hFinalDC, eax
-	INVOKE LoadImage, NULL, ADDR BackgroundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
-	mov BitmapBackground, eax
 	INVOKE CreateCompatibleDC, hFinalDC
 	mov hDC, eax
+	INVOKE CreateCompatibleDC, hDC
+	mov hMemDC, eax
+
+	INVOKE InitImage
+
 	INVOKE ShowWindow, hWnd, SW_SHOW
 	INVOKE UpdateWindow, hWnd
 	ret
@@ -82,35 +101,88 @@ Exit_Program:
 	INVOKE ExitProcess, 0
 InitInstance ENDP
 
-WndProc PROC, lhwnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
-LOCAL	ps:PAINTSTRUCT, pt:POINT
-		
-SAVE:
-		.IF localMsg == WM_CREATE
-			jmp WndProcExit
-		.ELSEIF localMsg == WM_TIMER
-			;jmp WndProcExit
-		.ELSEIF localMsg == WM_PAINT
-			INVOKE BeginPaint, lhwnd, ADDR ps
-			mov hFinalDC, eax
-			INVOKE SelectObject, hDC, BitmapBackground
-			INVOKE BitBlt, hFinalDC, 0, 0, SCREEN_X, SCREEN_Y, hDC, 0, 0, SRCCOPY
-			INVOKE EndPaint, lhwnd, ADDR ps
-			jmp WndProcExit
-		.ELSEIF localMsg == WM_KEYDOWN
-			jmp WndProcExit
-		.ELSEIF localMsg == WM_KEYUP	
-			jmp WndProcExit
-		.ELSEIF localMsg == WM_DESTROY
-			INVOKE ExitProcess, 0
-			jmp WndProcExit
-		.ELSE
-			INVOKE DefWindowProc, lhwnd, localMsg, wParam, lParam
-		.endif
+InitImage PROC
+	invoke LoadImage, NULL, ADDR BufferFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBuffer, eax
+	invoke LoadImage, NULL, ADDR BackgroundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBackground, eax
+	invoke LoadImage, NULL, ADDR YellowDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hYellowDot, eax
+	invoke LoadImage, NULL, ADDR NormalPlankFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlank, eax
+	ret
+InitImage ENDP
 
+WndProc PROC, lhwnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
+LOCAL	ps:PAINTSTRUCT, pt:POINT	
+SAVE:
+	.IF localMsg == WM_CREATE
+		jmp WndProcExit
+	.ELSEIF localMsg == WM_TIMER
+		;jmp WndProcExit
+	.ELSEIF localMsg == WM_PAINT
+		INVOKE BeginPaint, lhwnd, ADDR ps
+		mov hFinalDC, eax
+		invoke SelectObject, hDC, hBuffer
+		invoke DrawPlayingScreen
+		invoke BitBlt, hFinalDC, 0, 0, SCREEN_X, SCREEN_Y,\
+				hDC, 0, 0, SRCCOPY
+		INVOKE EndPaint, lhwnd, ADDR ps
+		jmp WndProcExit
+	.ELSEIF localMsg == WM_KEYDOWN
+		jmp WndProcExit
+	.ELSEIF localMsg == WM_KEYUP	
+		jmp WndProcExit
+	.ELSEIF localMsg == WM_DESTROY
+		INVOKE ExitProcess, 0
+		jmp WndProcExit
+	.ELSE
+		INVOKE DefWindowProc, lhwnd, localMsg, wParam, lParam
+	.ENDIF
 	
 WndProcExit:
 	ret
 WndProc ENDP	
 
+DrawPlayingScreen PROC
+	invoke DrawBackground
+	invoke DrawPlank
+	invoke DrawBalls
+	invoke DrawScore
+	ret
+DrawPlayingScreen ENDP
+
+DrawBackground PROC
+	invoke SelectObject, hMemDC, hBackground
+	invoke BitBlt, hDC, 0, 0, SCREEN_X, SCREEN_Y, \
+			hMemDC, 0, 0, SRCCOPY
+	ret
+DrawBackground ENDP
+
+DrawPlank PROC
+	invoke SelectObject, hMemDC, hPlank
+	invoke BitBlt, hDC, PLANK_X1, PLANK_Y, SCREEN_X, SCREEN_Y, \
+			hMemDC, 0, 0, SRCCOPY
+	ret
+DrawPlank ENDP
+
+DrawScore PROC
+LOCAL bgColor:DWORD
+LOCAL textColor:DWORD
+	;invoke SetTextColor, hDC, 010000h
+	;invoke TextOut, hDC, 20,30,OFFSET TempScore,4
+	ret
+DrawScore ENDP
+
+DrawBalls PROC
+	invoke DrawOneBall, 10, 10, 1
+	ret
+DrawBalls ENDP
+
+DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
+	invoke SelectObject, hMemDC, hYellowDot 
+	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,49,0,SRCAND
+	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,0,0,SRCPAINT
+	ret
+DrawOneBall ENDP
 END
