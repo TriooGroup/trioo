@@ -79,11 +79,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <MASM Include="GlobalVars.asm" />
+    <MASM Include="TriooGame.asm" />
     <MASM Include="TriooMain.asm" />
+    <MASM Include="TriooWindow.asm" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="GlobalVars.inc" />
+    <None Include="TriooGame.inc" />
+    <None Include="TriooWindow.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

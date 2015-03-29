@@ -21,9 +21,15 @@
     <MASM Include="GlobalVars.asm">
       <Filter>源文件</Filter>
     </MASM>
+    <MASM Include="TriooWindow.asm">
+      <Filter>源文件</Filter>
+    </MASM>
   </ItemGroup>
   <ItemGroup>
     <None Include="GlobalVars.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="TriooWindow.inc">
       <Filter>头文件</Filter>
     </None>
   </ItemGroup>
