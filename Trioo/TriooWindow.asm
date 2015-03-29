@@ -31,7 +31,7 @@ hDC dd ?
 hMemDC dd ?
 
 SCREEN_X = 1120
-SCREEN_Y = 660
+SCREEN_Y = 640
 PLANK_X1 = 24
 PLANK_X2 = 392
 PLANK_X3 = 760
@@ -41,11 +41,17 @@ hBuffer dd ?
 hBackground dd ?
 hPlank dd ?
 hYellowDot dd ?
+hRedDot dd ?
+hBlueDot dd ?
+hGreenDot dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
 NormalPlankFilePath BYTE "pic\trio_key_white.bmp", 0
 YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
+RedDotFilePath BYTE "pic\red_dot_combine.bmp", 0
+BlueDotFilePath BYTE "pic\blue_dot_combine.bmp", 0
+GreenDotFilePath BYTE "pic\green_dot_combine.bmp", 0
 
 TempScore BYTE "2304", 0
 
@@ -76,8 +82,8 @@ InitInstance PROC
 	.ENDIF	
 
 	;创建应用程序主窗口
-	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, SCREEN_X,
-				SCREEN_Y, NULL, NULL, hInstance, NULL
+	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPED + WS_CAPTION +WS_SYSMENU + WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, \
+		SCREEN_X, SCREEN_Y, NULL, NULL, hInstance, NULL
 	.IF eax == 0
 		;call ErrorHandler
 		jmp Exit_Program
@@ -108,6 +114,12 @@ InitImage PROC
 	mov hBackground, eax
 	invoke LoadImage, NULL, ADDR YellowDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hYellowDot, eax
+	invoke LoadImage, NULL, ADDR RedDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hRedDot, eax
+	invoke LoadImage, NULL, ADDR BlueDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBlueDot, eax
+	invoke LoadImage, NULL, ADDR GreenDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hGreenDot, eax
 	invoke LoadImage, NULL, ADDR NormalPlankFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hPlank, eax
 	ret
@@ -175,12 +187,23 @@ LOCAL textColor:DWORD
 DrawScore ENDP
 
 DrawBalls PROC
-	invoke DrawOneBall, 10, 10, 1
+	invoke DrawOneBall, 10, 100, 1
+	invoke DrawOneBall, 160, 447, 2
+	invoke DrawOneBall, 400, 80, 3
+	invoke DrawOneBall, 800, 300, 4
 	ret
 DrawBalls ENDP
 
 DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
+	.IF color == RED
+	invoke SelectObject, hMemDC, hRedDot 
+	.ELSEIF color == YELLOW
 	invoke SelectObject, hMemDC, hYellowDot 
+	.ELSEIF color == BLUE
+	invoke SelectObject, hMemDC, hBlueDot 
+	.ELSEIF color == GREEN
+	invoke SelectObject, hMemDC, hGreenDot 	
+	.ENDIF
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,49,0,SRCAND
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,0,0,SRCPAINT
 	ret
