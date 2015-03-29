@@ -59,7 +59,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Irvine32;C:\masm32\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <MASM>
+      <IncludePaths>C:\Irvine32;C:\masm32\include;%(IncludePaths)</IncludePaths>
+    </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

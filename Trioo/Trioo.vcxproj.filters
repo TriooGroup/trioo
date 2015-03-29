@@ -18,18 +18,18 @@
     <MASM Include="TriooMain.asm">
       <Filter>源文件</Filter>
     </MASM>
-    <MASM Include="GlobalVars.asm">
+    <MASM Include="TriooWindow.asm">
       <Filter>源文件</Filter>
     </MASM>
-    <MASM Include="TriooWindow.asm">
+    <MASM Include="TriooGame.asm">
       <Filter>源文件</Filter>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <None Include="GlobalVars.inc">
+    <None Include="TriooWindow.inc">
       <Filter>头文件</Filter>
     </None>
-    <None Include="TriooWindow.inc">
+    <None Include="TriooGame.inc">
       <Filter>头文件</Filter>
     </None>
   </ItemGroup>
