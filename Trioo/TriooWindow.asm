@@ -15,6 +15,7 @@ INCLUDE gdi32.inc
 INCLUDE masm32.inc
 INCLUDE winmm.inc
 
+INCLUDE TriooGame.inc
 .data
 WindowName BYTE "TriooName"
 className BYTE "Trioo", 0
@@ -27,7 +28,7 @@ hWnd DWORD ?
 hFinalDC dd ?
 
 BitmapBackground dd ?
-
+extern game: Game
 .code
 InitInstance PROC
 	INVOKE GetModuleHandle, NULL
