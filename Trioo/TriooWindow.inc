@@ -15,3 +15,6 @@ YELLOW EQU 2
 GREEN EQU 3
 BLUE EQU 4
 
+.data?
+hWnd DWORD ?
+

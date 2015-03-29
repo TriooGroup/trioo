@@ -24,7 +24,6 @@ msg MSG <>
 hInstance DWORD ?
 rect RECT <>
 TotalRect DWORD ?
-hWnd DWORD ?
 
 hFinalDC dd ?
 hDC dd ?
@@ -100,6 +99,9 @@ InitInstance PROC
 
 	INVOKE InitImage
 
+	;…Ë÷√ ±÷”
+	INVOKE SetTimer, hWnd, 1, 50, NULL
+
 	INVOKE ShowWindow, hWnd, SW_SHOW
 	INVOKE UpdateWindow, hWnd
 	ret
@@ -131,7 +133,8 @@ SAVE:
 	.IF localMsg == WM_CREATE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_TIMER
-		;jmp WndProcExit
+		INVOKE InvalidateRect, hWnd, NULL, TRUE
+		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
 		INVOKE BeginPaint, lhwnd, ADDR ps
 		mov hFinalDC, eax
@@ -204,6 +207,7 @@ DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
 	.ELSEIF color == GREEN
 	invoke SelectObject, hMemDC, hGreenDot 	
 	.ENDIF
+
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,49,0,SRCAND
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,0,0,SRCPAINT
 	ret

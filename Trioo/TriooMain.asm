@@ -31,6 +31,8 @@ Message_Loop:
 	INVOKE DispatchMessage, ADDR msg
 	jmp Message_Loop
 
+	;πÿ±’ ±÷”
+	INVOKE KillTimer, hWnd, 1
 Exit_Program:
 	INVOKE ExitProcess, 0
 WinMain ENDP
