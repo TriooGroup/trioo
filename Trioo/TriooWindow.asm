@@ -43,6 +43,8 @@ hYellowDot dd ?
 hRedDot dd ?
 hBlueDot dd ?
 hGreenDot dd ?
+hDotShadow dd ?
+hPlankShadow dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -51,6 +53,8 @@ YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
 RedDotFilePath BYTE "pic\red_dot_combine.bmp", 0
 BlueDotFilePath BYTE "pic\blue_dot_combine.bmp", 0
 GreenDotFilePath BYTE "pic\green_dot_combine.bmp", 0
+DotShadowFilePath BYTE "pic\dot_shadow.bmp", 0
+PlankShadowFilePath BYTE "pic\key_shadow.bmp", 0
 
 TempScore BYTE "2304", 0
 
@@ -124,6 +128,10 @@ InitImage PROC
 	mov hGreenDot, eax
 	invoke LoadImage, NULL, ADDR NormalPlankFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hPlank, eax
+	invoke LoadImage, NULL, ADDR DotShadowFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hDotShadow, eax
+	invoke LoadImage, NULL, ADDR PlankShadowFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlankShadow, eax
 	ret
 InitImage ENDP
 
@@ -161,8 +169,8 @@ WndProc ENDP
 
 DrawPlayingScreen PROC
 	invoke DrawBackground
-	invoke DrawPlank
 	invoke DrawBalls
+	invoke DrawPlank
 	invoke DrawScore
 	ret
 DrawPlayingScreen ENDP
@@ -178,6 +186,9 @@ DrawPlank PROC
 	invoke SelectObject, hMemDC, hPlank
 	invoke BitBlt, hDC, PLANK_X1, PLANK_Y, SCREEN_X, SCREEN_Y, \
 			hMemDC, 0, 0, SRCCOPY
+	invoke SelectObject, hMemDC, hPlankShadow
+	invoke BitBlt, hDC, PLANK_X1, PLANK_Y + 16, SCREEN_X, SCREEN_Y, \
+			hMemDC, 0, 0, SRCAND
 	ret
 DrawPlank ENDP
 
@@ -191,13 +202,16 @@ DrawScore ENDP
 
 DrawBalls PROC
 	invoke DrawOneBall, 10, 100, 1
-	invoke DrawOneBall, 160, 447, 2
+	invoke DrawOneBall, 160, 447, 2;447是刚好落在挡板上的位置
 	invoke DrawOneBall, 400, 80, 3
 	invoke DrawOneBall, 800, 300, 4
 	ret
 DrawBalls ENDP
 
 DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
+	invoke SelectObject, hMemDC, hDotShadow
+	INVOKE BitBlt,hDC,pos_x,pos_y,132,132,hMemDC,0,0,SRCAND
+
 	.IF color == RED
 	invoke SelectObject, hMemDC, hRedDot 
 	.ELSEIF color == YELLOW
@@ -210,6 +224,7 @@ DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
 
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,49,0,SRCAND
 	INVOKE BitBlt,hDC,pos_x,pos_y,49,49,hMemDC,0,0,SRCPAINT
+
 	ret
 DrawOneBall ENDP
 END
