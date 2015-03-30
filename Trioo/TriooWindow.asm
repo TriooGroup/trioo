@@ -45,6 +45,10 @@ hBlueDot dd ?
 hGreenDot dd ?
 hDotShadow dd ?
 hPlankShadow dd ?
+hPlankRed dd ?
+hPlankYellow dd ?
+hPlankBlue dd ?
+hPlankGreen dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -55,10 +59,15 @@ BlueDotFilePath BYTE "pic\blue_dot_combine.bmp", 0
 GreenDotFilePath BYTE "pic\green_dot_combine.bmp", 0
 DotShadowFilePath BYTE "pic\dot_shadow.bmp", 0
 PlankShadowFilePath BYTE "pic\key_shadow.bmp", 0
+PlankRedFilePath BYTE "pic\trio_plank_red.bmp", 0
+PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
+PlankBlueFilePath BYTE "pic\trio_plank_blue.bmp", 0
+PlankGreenFilePath BYTE "pic\trio_plank_green.bmp", 0
 
 TempScore BYTE "2304", 0
 
 extern game: Game
+
 .code
 InitInstance PROC
 	INVOKE GetModuleHandle, NULL
@@ -101,7 +110,8 @@ InitInstance PROC
 	INVOKE CreateCompatibleDC, hDC
 	mov hMemDC, eax
 
-	INVOKE InitImage
+	invoke InitImage
+	invoke InitData
 
 	;设置时钟
 	INVOKE SetTimer, hWnd, 1, 50, NULL
@@ -132,8 +142,38 @@ InitImage PROC
 	mov hDotShadow, eax
 	invoke LoadImage, NULL, ADDR PlankShadowFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hPlankShadow, eax
+	invoke LoadImage, NULL, ADDR PlankRedFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlankRed, eax
+	invoke LoadImage, NULL, ADDR PlankYellowFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlankYellow, eax
+	invoke LoadImage, NULL, ADDR PlankBlueFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlankBlue, eax
+	invoke LoadImage, NULL, ADDR PlankGreenFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPlankGreen, eax
 	ret
 InitImage ENDP
+
+InitData PROC
+;TEST 初始化游戏数据
+	mov game.plankPosition, 1
+	mov game.score, 0
+	mov game.state, OPENING
+	mov game.bestScore, 0
+	mov game.isActivated, YELLOW
+
+	mov esi, TYPE Ball
+	mov game.ball.positionX, 160
+	mov game.ball.positionY, 447
+	mov game.ball.color, YELLOW
+	mov game.ball.existed, 1
+
+	mov game.ball[esi].positionX, 400
+	mov game.ball[esi].positionY, 80
+	mov game.ball[esi].color, GREEN
+	mov game.ball[esi].existed, 1
+
+	ret
+InitData ENDP
 
 WndProc PROC, lhwnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
 LOCAL	ps:PAINTSTRUCT, pt:POINT	
@@ -183,7 +223,17 @@ DrawBackground PROC
 DrawBackground ENDP
 
 DrawPlank PROC
-	invoke SelectObject, hMemDC, hPlank
+	.IF game.isActivated == 0
+		invoke SelectObject, hMemDC, hPlank
+	.ELSEIF game.isActivated == RED
+		invoke SelectObject, hMemDC, hPlankRed
+	.ELSEIF game.isActivated == YELLOW
+		invoke SelectObject, hMemDC, hPlankYellow
+	.ELSEIF game.isActivated == BLUE
+		invoke SelectObject, hMemDC, hPlankBlue
+	.ELSEIF game.isActivated == GREEN
+		invoke SelectObject, hMemDC, hPlankGreen
+	.ENDIF
 	invoke BitBlt, hDC, PLANK_X1, PLANK_Y, SCREEN_X, SCREEN_Y, \
 			hMemDC, 0, 0, SRCCOPY
 	invoke SelectObject, hMemDC, hPlankShadow
@@ -201,10 +251,23 @@ LOCAL textColor:DWORD
 DrawScore ENDP
 
 DrawBalls PROC
-	invoke DrawOneBall, 10, 100, 1
-	invoke DrawOneBall, 160, 447, 2;447是刚好落在挡板上的位置
-	invoke DrawOneBall, 400, 80, 3
-	invoke DrawOneBall, 800, 300, 4
+	mov edx, TYPE Ball
+	mov esi, 0
+	mov ecx, MAX_NUM
+
+L1:
+	push edx
+	push esi
+	push ecx
+	.IF game.ball[esi].existed == 1
+		invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+	.ENDIF
+	pop ecx
+	pop esi
+	pop edx
+	add esi, edx
+	loop L1
+
 	ret
 DrawBalls ENDP
 

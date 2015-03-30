@@ -3,6 +3,8 @@
 InitInstance PROTO
 InitGame PROTO
 InitImage PROTO
+InitData PROTO
+
 DrawPlayingScreen PROTO
 DrawBackground PROTO
 DrawBalls PROTO

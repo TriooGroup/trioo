@@ -22,7 +22,7 @@ Game STRUCT
 	score DWORD ?
 	state DWORD ?
 	bestScore DWORD ?
-	isActivited DWORD ?
+	isActivated DWORD ?
 	gravity DWORD ?
 Game ENDS
 
