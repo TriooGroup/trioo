@@ -223,6 +223,7 @@ DrawBackground PROC
 DrawBackground ENDP
 
 DrawPlank PROC
+LOCAL positionX:DWORD
 	.IF game.isActivated == 0
 		invoke SelectObject, hMemDC, hPlank
 	.ELSEIF game.isActivated == RED
@@ -234,11 +235,20 @@ DrawPlank PROC
 	.ELSEIF game.isActivated == GREEN
 		invoke SelectObject, hMemDC, hPlankGreen
 	.ENDIF
-	invoke BitBlt, hDC, PLANK_X1, PLANK_Y, SCREEN_X, SCREEN_Y, \
-			hMemDC, 0, 0, SRCCOPY
+
+	.IF game.plankPosition == 1
+		mov positionX, PLANK_X1
+	.ELSEIF game.plankPosition == 2
+		mov positionX, PLANK_X2
+	.ELSE
+		mov positionX, PLANK_X3
+	.ENDIF
+	invoke BitBlt, hDC, positionX, PLANK_Y, SCREEN_X, SCREEN_Y, \
+		hMemDC, 0, 0, SRCCOPY
 	invoke SelectObject, hMemDC, hPlankShadow
-	invoke BitBlt, hDC, PLANK_X1, PLANK_Y + 16, SCREEN_X, SCREEN_Y, \
-			hMemDC, 0, 0, SRCAND
+	invoke BitBlt, hDC, positionX, PLANK_Y + 16, SCREEN_X, SCREEN_Y, \
+		hMemDC, 0, 0, SRCAND
+
 	ret
 DrawPlank ENDP
 
