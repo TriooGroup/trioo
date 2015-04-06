@@ -11,6 +11,8 @@ DrawBalls PROTO
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
 DrawPlank PROTO
 DrawScore PROTO
+IntToStr PROTO, val:DWORD
+StringLen PROTO, pString: PTR BYTE
 
 RED EQU 1
 YELLOW EQU 2

@@ -28,6 +28,7 @@ TotalRect DWORD ?
 hFinalDC dd ?
 hDC dd ?
 hMemDC dd ?
+hFont dd ?
 
 SCREEN_X = 1120
 SCREEN_Y = 640
@@ -64,7 +65,8 @@ PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
 PlankBlueFilePath BYTE "pic\trio_plank_blue.bmp", 0
 PlankGreenFilePath BYTE "pic\trio_plank_green.bmp", 0
 
-TempScore BYTE "2304", 0
+strBuffer BYTE 20 DUP (0)
+fontStr BYTE "Lucida Sans Unicode", 0
 
 extern game: Game
 
@@ -156,7 +158,7 @@ InitImage ENDP
 InitData PROC
 ;TEST 初始化游戏数据
 	mov game.plankPosition, 1
-	mov game.score, 0
+	mov game.score, 123
 	mov game.state, OPENING
 	mov game.bestScore, 0
 	mov game.isActivated, YELLOW
@@ -255,6 +257,18 @@ DrawPlank ENDP
 DrawScore PROC
 LOCAL bgColor:DWORD
 LOCAL textColor:DWORD
+	invoke SetBkMode, hDC, TRANSPARENT ;设置背景透明
+	;调整字体
+	score_Height = 35
+	invoke CreateFont,score_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFont, eax
+	invoke SelectObject, hDC, hFont
+	;转成字符串
+	invoke IntToStr, game.score
+	invoke SetTextColor, hDC, 0ffffffh
+	invoke StringLen, ADDR strBuffer
+	invoke TextOut, hDC, 20, 20, ADDR strBuffer, eax
 	;invoke SetTextColor, hDC, 010000h
 	;invoke TextOut, hDC, 20,30,OFFSET TempScore,4
 	ret
@@ -300,4 +314,45 @@ DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
 
 	ret
 DrawOneBall ENDP
+
+IntToStr PROC USES eax ebx ecx edx,
+	val:DWORD
+	mov eax, val
+	mov bl, 0
+	.REPEAT
+		mov dl, 10
+		div dl
+		movzx dx, ah
+		push dx
+		mov ah, 0
+		inc bl
+	.UNTIL al==0
+	movzx ecx, bl
+	mov edi, offset strBuffer
+L1:
+	pop ax
+	add al, '0'
+	mov [edi], al
+	inc edi
+	LOOP L1
+	mov al, 0
+	mov [edi], al
+	ret
+IntToStr ENDP
+
+StringLen PROC USES edi,
+	pString: PTR BYTE
+	mov edi, pString
+	mov eax, 0
+
+L1:
+	cmp byte ptr [edi], 0
+	je L2
+	inc edi
+	inc eax
+	jmp L1
+L2:
+	ret
+StringLen ENDP
+
 END
