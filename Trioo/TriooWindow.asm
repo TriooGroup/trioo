@@ -58,7 +58,7 @@ YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
 RedDotFilePath BYTE "pic\red_dot_combine.bmp", 0
 BlueDotFilePath BYTE "pic\blue_dot_combine.bmp", 0
 GreenDotFilePath BYTE "pic\green_dot_combine.bmp", 0
-DotShadowFilePath BYTE "pic\dot_shadow.bmp", 0
+DotShadowFilePath BYTE "pic\dot_shadow_new.bmp", 0
 PlankShadowFilePath BYTE "pic\key_shadow.bmp", 0
 PlankRedFilePath BYTE "pic\trio_plank_red.bmp", 0
 PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
@@ -269,8 +269,6 @@ LOCAL textColor:DWORD
 	invoke SetTextColor, hDC, 0ffffffh
 	invoke StringLen, ADDR strBuffer
 	invoke TextOut, hDC, 20, 20, ADDR strBuffer, eax
-	;invoke SetTextColor, hDC, 010000h
-	;invoke TextOut, hDC, 20,30,OFFSET TempScore,4
 	ret
 DrawScore ENDP
 
@@ -296,8 +294,16 @@ L1:
 DrawBalls ENDP
 
 DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
+LOCAL shadow_pos_x:DWORD
+LOCAL shadow_pos_y:DWORD
+	mov eax, pos_x
+	inc eax
+	mov shadow_pos_x, eax
+	mov eax, pos_y
+	inc eax
+	mov shadow_pos_y, eax
 	invoke SelectObject, hMemDC, hDotShadow
-	INVOKE BitBlt,hDC,pos_x,pos_y,132,132,hMemDC,0,0,SRCAND
+	INVOKE BitBlt,hDC,shadow_pos_x,shadow_pos_y,132,132,hMemDC,0,0,SRCAND
 
 	.IF color == RED
 	invoke SelectObject, hMemDC, hRedDot 
