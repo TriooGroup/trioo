@@ -29,12 +29,6 @@ hFinalDC dd ?
 hDC dd ?
 hMemDC dd ?
 
-SCREEN_X = 1120
-SCREEN_Y = 640
-PLANK_X1 = 24
-PLANK_X2 = 392
-PLANK_X3 = 760
-PLANK_Y = 496
 
 hBuffer dd ?
 hBackground dd ?
@@ -155,22 +149,7 @@ InitImage ENDP
 
 InitData PROC
 ;TEST 初始化游戏数据
-	mov game.plankPosition, 1
-	mov game.score, 0
-	mov game.state, OPENING
-	mov game.bestScore, 0
-	mov game.isActivated, YELLOW
-
-	mov esi, TYPE Ball
-	mov game.ball.positionX, 160
-	mov game.ball.positionY, 447
-	mov game.ball.color, YELLOW
-	mov game.ball.existed, 1
-
-	mov game.ball[esi].positionX, 400
-	mov game.ball[esi].positionY, 80
-	mov game.ball[esi].color, GREEN
-	mov game.ball[esi].existed, 1
+	invoke startGame
 
 	ret
 InitData ENDP
@@ -181,6 +160,7 @@ SAVE:
 	.IF localMsg == WM_CREATE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_TIMER
+		invoke step
 		INVOKE InvalidateRect, hWnd, NULL, TRUE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
@@ -193,6 +173,7 @@ SAVE:
 		INVOKE EndPaint, lhwnd, ADDR ps
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYDOWN
+		invoke KeyDownProc, localMsg, wParam, lParam
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYUP	
 		jmp WndProcExit
@@ -300,4 +281,17 @@ DrawOneBall PROC, pos_x:DWORD, pos_y:DWORD, color:DWORD
 
 	ret
 DrawOneBall ENDP
+
+KeyDownProc PROC, localMsg: DWORD, wParam: DWORD, lParam: DWORD
+	.IF wParam == VK_LEFT
+		invoke movePlank, 1
+		ret
+	.ELSEIF wParam == VK_DOWN
+		invoke movePlank, 2
+		ret
+	.ELSEIF wParam == VK_RIGHT
+		invoke movePlank, 3
+		ret
+	.ENDIF
+KeyDownProc ENDP
 END
