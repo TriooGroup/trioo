@@ -13,6 +13,9 @@ DrawPlank PROTO
 DrawScore PROTO
 KeyDownProc PROTO, localMsg: DWORD, wParam: DWORD, lParam: DWORD
 
+IntToStr PROTO, val:DWORD
+StringLen PROTO, pString: PTR BYTE
+
 
 .data?
 hWnd DWORD ?
