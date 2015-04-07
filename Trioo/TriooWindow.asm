@@ -44,7 +44,11 @@ hPlankYellow dd ?
 hPlankBlue dd ?
 hPlankGreen dd ?
 hHalo1 dd ?
+hHalo1Medium dd ?
+hHalo1Small dd ?
 hHalo2 dd ?
+hHalo2Medium dd ?
+hHalo2Small dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -60,7 +64,11 @@ PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
 PlankBlueFilePath BYTE "pic\trio_plank_blue.bmp", 0
 PlankGreenFilePath BYTE "pic\trio_plank_green.bmp", 0
 Halo1FilePath BYTE "pic\trio_key_halo_01_combine.bmp", 0
+Halo1MediumFilePath BYTE "pic\trio_key_halo_01_medium.bmp", 0
+Halo1SmallFilePath BYTE "pic\trio_key_halo_01_small.bmp", 0
 Halo2FilePath BYTE "pic\trio_key_halo_02_combine.bmp", 0
+Halo2MediumFilePath BYTE "pic\trio_key_halo_02_medium.bmp", 0
+Halo2SmallFilePath BYTE "pic\trio_key_halo_02_small.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -151,8 +159,16 @@ InitImage PROC
 	mov hPlankGreen, eax
 	invoke LoadImage, NULL, ADDR Halo1FilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo1, eax
+	invoke LoadImage, NULL, ADDR Halo1MediumFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo1Medium, eax
+	invoke LoadImage, NULL, ADDR Halo1SmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo1Small, eax
 	invoke LoadImage, NULL, ADDR Halo2FilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo2, eax
+	invoke LoadImage, NULL, ADDR Halo2MediumFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2Medium, eax
+	invoke LoadImage, NULL, ADDR Halo2SmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2Small, eax
 
 	ret
 InitImage ENDP
@@ -249,14 +265,73 @@ LOCAL positionX:DWORD
 		hMemDC, 0, 0, SRCAND
 
 	;Halo
-	;.IF game.activeCountdown > 0
-	;	invoke SelectObject, hMemDC, hHalo1
-	;	invoke BitBlt, hDC, positionX, PLANK_Y - 30, positionX + 18, PLANK_Y - 30 + 18, \
-	;		hMemDC, 0, 0, SRCCOPY
-	;.ENDIF
+	.IF game.activeCountdown > 0
+		;œ¬≤„»¶
+		mov edx, positionX
+		invoke DrawCircle, edx, PLANK_Y - 30, 18, hHalo1
+		add edx, 140
+		invoke DrawCircle, edx, PLANK_Y - 60, 18, hHalo1
+		add edx, 160
+		invoke DrawCircle, edx, PLANK_Y - 40, 18, hHalo1
+
+		;œ¬≤„≤Ê
+		mov edx, positionX
+		add edx, 85
+		invoke DrawCross, edx, PLANK_Y-25, 16, hHalo2 
+		add edx, 150
+		invoke DrawCross, edx, PLANK_Y-45, 16, hHalo2 
+
+		;÷–≤„»¶
+		mov edx, positionX
+		;add edx, 85
+		;invoke DrawCircle, edx, PLANK_Y-80, 16, hHalo1Medium
+		add edx, 250
+		invoke DrawCircle, edx, PLANK_Y-90, 16, hHalo1Medium
+
+		;÷–≤„≤Ê
+		mov edx, positionX
+		add edx, 60
+		invoke DrawCross, edx, PLANK_Y-100, 14, hHalo2Medium
+		;add edx, 140
+		;invoke DrawCross, edx, PLANK_Y-110, 14, hHalo2Medium
+
+		;…œ≤„»¶
+		mov edx, positionX
+		add edx, 60
+		invoke DrawCross, edx, PLANK_Y-165, 14, hHalo1Small
+		add edx, 70
+		invoke DrawCross, edx, PLANK_Y-130, 14, hHalo1Small
+		add edx, 165
+		invoke DrawCross, edx, PLANK_Y-155, 14, hHalo1Small
+
+		;…œ≤„≤Ê
+		mov edx, positionX
+		add edx, 10
+		invoke DrawCross, edx, PLANK_Y-160, 12, hHalo2Small
+		add edx, 180
+		invoke DrawCross, edx, PLANK_Y-153, 12, hHalo2Small
+		add edx, 70
+		invoke DrawCross, edx, PLANK_Y-135, 12, hHalo2Small
+
+	.ENDIF
 
 	ret
 DrawPlank ENDP
+
+DrawCircle PROC USES edx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
+	invoke SelectObject, hMemDC, handle
+	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, side_length, 0, SRCAND
+	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, 0, 0, SRCPAINT
+	ret
+DrawCircle ENDP
+
+DrawCross PROC USES edx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
+	invoke SelectObject, hMemDC, handle
+	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, side_length, 0, SRCAND
+	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, 0, 0, SRCPAINT
+	ret
+DrawCross ENDP
+
 
 DrawScore PROC
 LOCAL bgColor:DWORD
