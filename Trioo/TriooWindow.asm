@@ -30,7 +30,6 @@ hDC dd ?
 hMemDC dd ?
 hFont dd ?
 
-
 hBuffer dd ?
 hBackground dd ?
 hPlank dd ?
@@ -44,6 +43,8 @@ hPlankRed dd ?
 hPlankYellow dd ?
 hPlankBlue dd ?
 hPlankGreen dd ?
+hHalo1 dd ?
+hHalo2 dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -58,6 +59,8 @@ PlankRedFilePath BYTE "pic\trio_plank_red.bmp", 0
 PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
 PlankBlueFilePath BYTE "pic\trio_plank_blue.bmp", 0
 PlankGreenFilePath BYTE "pic\trio_plank_green.bmp", 0
+Halo1FilePath BYTE "pic\trio_key_halo_01_combine.bmp", 0
+Halo2FilePath BYTE "pic\trio_key_halo_02_combine.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -146,6 +149,11 @@ InitImage PROC
 	mov hPlankBlue, eax
 	invoke LoadImage, NULL, ADDR PlankGreenFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hPlankGreen, eax
+	invoke LoadImage, NULL, ADDR Halo1FilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo1, eax
+	invoke LoadImage, NULL, ADDR Halo2FilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2, eax
+
 	ret
 InitImage ENDP
 
@@ -157,6 +165,7 @@ InitData PROC
 	mov game.state, OPENING
 	mov game.bestScore, 0
 	mov game.isActivated, YELLOW
+	mov game.activeCountdown, 4
 	ret
 InitData ENDP
 
@@ -166,8 +175,8 @@ SAVE:
 	.IF localMsg == WM_CREATE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_TIMER
-		invoke step
-		INVOKE InvalidateRect, hWnd, NULL, TRUE
+		;invoke step
+		INVOKE InvalidateRect, hWnd, NULL, FALSE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
 		INVOKE BeginPaint, lhwnd, ADDR ps
@@ -211,16 +220,18 @@ DrawBackground ENDP
 
 DrawPlank PROC
 LOCAL positionX:DWORD
-	.IF game.isActivated == 0
+	.IF game.activeCountdown > 0
+		.IF game.isActivated == RED
+			invoke SelectObject, hMemDC, hPlankRed
+		.ELSEIF game.isActivated == YELLOW
+			invoke SelectObject, hMemDC, hPlankYellow
+		.ELSEIF game.isActivated == BLUE
+			invoke SelectObject, hMemDC, hPlankBlue
+		.ELSEIF game.isActivated == GREEN
+			invoke SelectObject, hMemDC, hPlankGreen
+		.ENDIF
+	.ELSE
 		invoke SelectObject, hMemDC, hPlank
-	.ELSEIF game.isActivated == RED
-		invoke SelectObject, hMemDC, hPlankRed
-	.ELSEIF game.isActivated == YELLOW
-		invoke SelectObject, hMemDC, hPlankYellow
-	.ELSEIF game.isActivated == BLUE
-		invoke SelectObject, hMemDC, hPlankBlue
-	.ELSEIF game.isActivated == GREEN
-		invoke SelectObject, hMemDC, hPlankGreen
 	.ENDIF
 
 	.IF game.plankPosition == 1
@@ -230,11 +241,19 @@ LOCAL positionX:DWORD
 	.ELSE
 		mov positionX, PLANK_X3
 	.ENDIF
-	invoke BitBlt, hDC, positionX, PLANK_Y, SCREEN_X, SCREEN_Y, \
+	invoke BitBlt, hDC, positionX, PLANK_Y, PLANK_WIDTH, PLANK_HEIGHT, \
 		hMemDC, 0, 0, SRCCOPY
+
 	invoke SelectObject, hMemDC, hPlankShadow
-	invoke BitBlt, hDC, positionX, PLANK_Y + 16, SCREEN_X, SCREEN_Y, \
+	invoke BitBlt, hDC, positionX, PLANK_Y + 16, 160, 160, \
 		hMemDC, 0, 0, SRCAND
+
+	;Halo
+	;.IF game.activeCountdown > 0
+	;	invoke SelectObject, hMemDC, hHalo1
+	;	invoke BitBlt, hDC, positionX, PLANK_Y - 30, positionX + 18, PLANK_Y - 30 + 18, \
+	;		hMemDC, 0, 0, SRCCOPY
+	;.ENDIF
 
 	ret
 DrawPlank ENDP
