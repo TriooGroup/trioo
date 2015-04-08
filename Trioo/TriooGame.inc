@@ -6,12 +6,14 @@ OPENING EQU 0
 LIVE EQU 1
 DEAD EQU 2
 PAUSED EQU 3
+HELP EQU 4
 
 Ball STRUCT
 	positionX SDWORD ?
 	positionY SDWORD ?
 	velocityX SDWORD ?
 	velocityY SDWORD ?
+	speedType SDWORD ?
 	color DWORD ?
 	existed DWORD ?
 Ball ENDS
