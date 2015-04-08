@@ -148,14 +148,14 @@ InitInstance PROC
 	mov MainWin.hbrBackground, eax
 	mov MainWin.lpszMenuName, NULL
 	mov MainWin.lpszClassName, OFFSET className	
-	;×¢²á´°¿ÚÀà
+
 	INVOKE RegisterClass, ADDR MainWin
 	.IF eax == 0
 		;call ErrorHandler
 		jmp Exit_Program
 	.ENDIF	
 
-	;´´½¨Ó¦ÓÃ³ÌÐòÖ÷´°¿Ú
+
 	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPED + WS_CAPTION +WS_SYSMENU + WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, \
 		SCREEN_X, SCREEN_Y, NULL, NULL, hInstance, NULL
 	.IF eax == 0
@@ -175,7 +175,7 @@ InitInstance PROC
 	invoke InitImage
 	invoke InitData
 
-	;ÉèÖÃÊ±ÖÓ
+
 	INVOKE SetTimer, hWnd, 1, 50, NULL
 
 	INVOKE ShowWindow, hWnd, SW_SHOW
@@ -242,7 +242,7 @@ InitImage PROC
 InitImage ENDP
 
 InitData PROC
-;TEST ³õÊ¼»¯ÓÎÏ·Êý¾Ý
+
 	invoke startGame
 	mov game.plankPosition, 1
 	mov game.score, 123
@@ -366,7 +366,7 @@ LOCAL positionX:DWORD
 
 	;Halo
 	.IF game.activeCountdown > 0
-		;ÏÂ²ãÈ¦
+
 		mov edx, positionX
 		invoke DrawCircle, edx, PLANK_Y - 30, 18, hHalo1
 		add edx, 140
@@ -374,28 +374,28 @@ LOCAL positionX:DWORD
 		add edx, 160
 		invoke DrawCircle, edx, PLANK_Y - 40, 18, hHalo1
 
-		;ÏÂ²ã²æ
+
 		mov edx, positionX
 		add edx, 85
 		invoke DrawCross, edx, PLANK_Y-25, 16, hHalo2 
 		add edx, 150
 		invoke DrawCross, edx, PLANK_Y-45, 16, hHalo2 
 
-		;ÖÐ²ãÈ¦
+
 		mov edx, positionX
 		;add edx, 85
 		;invoke DrawCircle, edx, PLANK_Y-80, 16, hHalo1Medium
 		add edx, 250
 		invoke DrawCircle, edx, PLANK_Y-90, 16, hHalo1Medium
 
-		;ÖÐ²ã²æ
+
 		mov edx, positionX
 		add edx, 60
 		invoke DrawCross, edx, PLANK_Y-100, 14, hHalo2Medium
 		;add edx, 140
 		;invoke DrawCross, edx, PLANK_Y-110, 14, hHalo2Medium
 
-		;ÉÏ²ãÈ¦
+
 		mov edx, positionX
 		add edx, 60
 		invoke DrawCross, edx, PLANK_Y-165, 14, hHalo1Small
@@ -404,7 +404,7 @@ LOCAL positionX:DWORD
 		add edx, 165
 		invoke DrawCross, edx, PLANK_Y-155, 14, hHalo1Small
 
-		;ÉÏ²ã²æ
+
 		mov edx, positionX
 		add edx, 10
 		invoke DrawCross, edx, PLANK_Y-160, 12, hHalo2Small
@@ -436,14 +436,14 @@ DrawCross ENDP
 DrawScore PROC
 LOCAL bgColor:DWORD
 LOCAL textColor:DWORD
-	invoke SetBkMode, hDC, TRANSPARENT ;ÉèÖÃ±³¾°Í¸Ã÷
-	;µ÷Õû×ÖÌå
+	invoke SetBkMode, hDC, TRANSPARENT 
+
 	score_Height = 35
 	invoke CreateFont,score_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
                 CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
 	mov hFont, eax
 	invoke SelectObject, hDC, hFont
-	;×ª³É×Ö·û´®
+
 	invoke IntToStr, game.score
 	invoke SetTextColor, hDC, 0ffffffh
 	invoke StringLen, ADDR strBuffer
@@ -651,13 +651,13 @@ drawDeadScreen PROC USES eax,
 	invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
 	invoke drawDeadBtns
 
-	invoke SetBkMode, ps.hdc, TRANSPARENT ;ÉèÖÃ±³¾°Í¸Ã÷
-	;µ÷Õû×ÖÌå
+	invoke SetBkMode, ps.hdc, TRANSPARENT
+
 	invoke CreateFont,deadScore_Height,0,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
                 CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
 	mov hFont, eax
 	invoke SelectObject, ps.hdc, hFont
-	;×ª³É×Ö·û´®
+
 	invoke IntToStr, score
 	invoke SetTextColor, ps.hdc, 0050bdf0h
 	invoke StringLen, ADDR strBuffer
