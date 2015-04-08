@@ -23,6 +23,7 @@ MainWin WNDCLASS <>
 msg MSG <>
 hInstance DWORD ?
 rect RECT <>
+hitpoint POINT <>
 TotalRect DWORD ?
 
 hFinalDC dd ?
@@ -73,6 +74,60 @@ Halo2SmallFilePath BYTE "pic\trio_key_halo_02_small.bmp", 0
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
 
+bgImgPath	BYTE "pic\bgImg.bmp", 0
+bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
+bgImgHelpPath BYTE "pic\help.bmp", 0
+
+
+btnEndlessPath BYTE "pic\btnEndless.bmp", 0
+btnEndless_X equ 600
+btnEndless_Y equ 350
+btnEndless_Width equ 124
+btnEndless_Height equ 124
+btnEndless_pressed BYTE 0
+
+btnHelpPath BYTE "pic\btnHelp.bmp", 0
+btnHelp_X equ 400
+btnHelp_Y equ 350
+btnHelp_Width equ 124
+btnHelp_Height equ 124
+btnHelp_pressed BYTE 0
+
+btnHomePath BYTE "pic\btnHome.bmp", 0
+btnHome_X equ 50
+btnHome_Y equ 50
+btnHome_Width equ 124
+btnHome_Height equ 124
+btnHome_pressed BYTE 0
+
+btnReplayPath BYTE "btnReplay.bmp", 0
+btnReplay_X equ 380
+btnReplay_Y equ 280
+btnReplay_Width equ 122
+btnReplay_Height equ 117
+btnReplay_pressed BYTE 0
+
+btnPressedOffset_X equ 5
+btnPressedOffset_Y equ 5
+
+score_X equ 550
+score_Y equ 280
+deadScore_Height equ 60
+best_X equ 550
+best_Y equ 350
+best_Height equ 50
+bestScore_X equ 650
+bestScore_Y equ 350
+
+hBitmap_bg dd ?
+hBitmap_btn_endless dd ?
+hBitmap_btn_help dd ?
+hBitmap_bg_dead dd ?
+hBitmap_btn_replay dd ?
+hBitmap_help dd ?
+
+bestStr BYTE "Best", 0
+
 extern game: Game
 
 .code
@@ -93,14 +148,14 @@ InitInstance PROC
 	mov MainWin.hbrBackground, eax
 	mov MainWin.lpszMenuName, NULL
 	mov MainWin.lpszClassName, OFFSET className	
-	;ע�ᴰ����
+	;×¢²á´°¿ÚÀà
 	INVOKE RegisterClass, ADDR MainWin
 	.IF eax == 0
 		;call ErrorHandler
 		jmp Exit_Program
 	.ENDIF	
 
-	;����Ӧ�ó���������
+	;´´½¨Ó¦ÓÃ³ÌÐòÖ÷´°¿Ú
 	INVOKE CreateWindowEx, 0, ADDR className, ADDR WindowName,WS_OVERLAPPED + WS_CAPTION +WS_SYSMENU + WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, \
 		SCREEN_X, SCREEN_Y, NULL, NULL, hInstance, NULL
 	.IF eax == 0
@@ -120,7 +175,7 @@ InitInstance PROC
 	invoke InitImage
 	invoke InitData
 
-	;����ʱ��
+	;ÉèÖÃÊ±ÖÓ
 	INVOKE SetTimer, hWnd, 1, 50, NULL
 
 	INVOKE ShowWindow, hWnd, SW_SHOW
@@ -170,11 +225,24 @@ InitImage PROC
 	invoke LoadImage, NULL, ADDR Halo2SmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo2Small, eax
 
+	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_bg, eax
+	INVOKE LoadImage, NULL, ADDR btnEndlessPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_btn_endless, eax
+	INVOKE LoadImage, NULL, ADDR bgImgDeadPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_bg_dead, eax
+	INVOKE LoadImage, NULL, ADDR btnReplayPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_btn_replay, eax
+	INVOKE LoadImage, NULL, ADDR bgImgHelpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_help, eax
+	INVOKE LoadImage, NULL, ADDR btnHelpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_btn_help, eax
+
 	ret
 InitImage ENDP
 
 InitData PROC
-;TEST ��ʼ����Ϸ����
+;TEST ³õÊ¼»¯ÓÎÏ·Êý¾Ý
 	invoke startGame
 	mov game.plankPosition, 1
 	mov game.score, 123
@@ -191,23 +259,55 @@ SAVE:
 	.IF localMsg == WM_CREATE
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_TIMER
-		;invoke step
-		INVOKE InvalidateRect, hWnd, NULL, FALSE
+		.IF game.state == LIVE
+			invoke step
+			INVOKE InvalidateRect, hWnd, NULL, FALSE
+		.ENDIF
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
+
 		INVOKE BeginPaint, lhwnd, ADDR ps
 		mov hFinalDC, eax
 		invoke SelectObject, hDC, hBuffer
-		invoke DrawPlayingScreen
+
+		.IF game.state == LIVE
+			invoke DrawPlayingScreen
+		.ELSEIF game.state == OPENING
+			invoke drawOpeningScreen
+		.ELSEIF game.state == HELP
+			invoke drawHelpScreen
+		.ELSE
+			invoke drawDeadScreen, 125, 1127
+		.ENDIF
+
 		invoke BitBlt, hFinalDC, 0, 0, SCREEN_X, SCREEN_Y,\
 				hDC, 0, 0, SRCCOPY
 		INVOKE EndPaint, lhwnd, ADDR ps
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYDOWN
-		invoke KeyDownProc, localMsg, wParam, lParam
+		.IF game.state == LIVE
+			invoke KeyDownProc, localMsg, wParam, lParam	
+		.ENDIF
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYUP	
 		jmp WndProcExit
+	.ELSEIF localMsg == WM_LBUTTONDOWN 
+		mov eax,lParam 
+        and eax,0FFFFh 
+        mov hitpoint.x,eax 
+        mov eax,lParam 
+        shr eax,16 
+        mov hitpoint.y,eax 
+        .IF game.state == OPENING
+			invoke mouseDownOpening, hitpoint
+		.ENDIF
+	.ELSEIF localMsg == WM_LBUTTONUP
+		.IF game.state == OPENING
+			invoke mouseUpOpening
+		.ELSEIF game.state == HELP
+			invoke mouseUpHelp
+		.ELSE
+		.ENDIF
 	.ELSEIF localMsg == WM_DESTROY
 		INVOKE ExitProcess, 0
 		jmp WndProcExit
@@ -266,7 +366,7 @@ LOCAL positionX:DWORD
 
 	;Halo
 	.IF game.activeCountdown > 0
-		;�²�Ȧ
+		;ÏÂ²ãÈ¦
 		mov edx, positionX
 		invoke DrawCircle, edx, PLANK_Y - 30, 18, hHalo1
 		add edx, 140
@@ -274,28 +374,28 @@ LOCAL positionX:DWORD
 		add edx, 160
 		invoke DrawCircle, edx, PLANK_Y - 40, 18, hHalo1
 
-		;�²��
+		;ÏÂ²ã²æ
 		mov edx, positionX
 		add edx, 85
 		invoke DrawCross, edx, PLANK_Y-25, 16, hHalo2 
 		add edx, 150
 		invoke DrawCross, edx, PLANK_Y-45, 16, hHalo2 
 
-		;�в�Ȧ
+		;ÖÐ²ãÈ¦
 		mov edx, positionX
 		;add edx, 85
 		;invoke DrawCircle, edx, PLANK_Y-80, 16, hHalo1Medium
 		add edx, 250
 		invoke DrawCircle, edx, PLANK_Y-90, 16, hHalo1Medium
 
-		;�в��
+		;ÖÐ²ã²æ
 		mov edx, positionX
 		add edx, 60
 		invoke DrawCross, edx, PLANK_Y-100, 14, hHalo2Medium
 		;add edx, 140
 		;invoke DrawCross, edx, PLANK_Y-110, 14, hHalo2Medium
 
-		;�ϲ�Ȧ
+		;ÉÏ²ãÈ¦
 		mov edx, positionX
 		add edx, 60
 		invoke DrawCross, edx, PLANK_Y-165, 14, hHalo1Small
@@ -304,7 +404,7 @@ LOCAL positionX:DWORD
 		add edx, 165
 		invoke DrawCross, edx, PLANK_Y-155, 14, hHalo1Small
 
-		;�ϲ��
+		;ÉÏ²ã²æ
 		mov edx, positionX
 		add edx, 10
 		invoke DrawCross, edx, PLANK_Y-160, 12, hHalo2Small
@@ -336,14 +436,14 @@ DrawCross ENDP
 DrawScore PROC
 LOCAL bgColor:DWORD
 LOCAL textColor:DWORD
-	invoke SetBkMode, hDC, TRANSPARENT ;���ñ���͸��
-	;��������
+	invoke SetBkMode, hDC, TRANSPARENT ;ÉèÖÃ±³¾°Í¸Ã÷
+	;µ÷Õû×ÖÌå
 	score_Height = 35
 	invoke CreateFont,score_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
                 CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
 	mov hFont, eax
 	invoke SelectObject, hDC, hFont
-	;ת���ַ���
+	;×ª³É×Ö·û´®
 	invoke IntToStr, game.score
 	invoke SetTextColor, hDC, 0ffffffh
 	invoke StringLen, ADDR strBuffer
@@ -412,6 +512,173 @@ KeyDownProc PROC, localMsg: DWORD, wParam: DWORD, lParam: DWORD
 		ret
 	.ENDIF
 KeyDownProc ENDP
+
+
+drawImg PROC USES eax,
+	hBitmap:DWORD, x:DWORD, y:DWORD,
+	w:DWORD, h:DWORD
+
+	invoke SelectObject, hMemDC, hBitmap
+	invoke BitBlt, hDC, x, y, w, h, \
+			hMemDC, 0, 0, SRCCOPY 
+	ret
+drawImg ENDP
+
+drawOpeningBtns PROC
+	.if btnEndless_pressed == 0
+		invoke drawImg, hBitmap_btn_endless, btnEndless_X, btnEndless_Y, \
+			btnEndless_Width, btnEndless_Height
+	.else
+		invoke drawImg, hBitmap_btn_endless, \
+			btnEndless_X+btnPressedOffset_X, btnEndless_Y+btnPressedOffset_Y, \
+			btnEndless_Width, btnEndless_Height
+	.endif
+
+	.if btnHelp_pressed == 0
+		invoke drawImg, hBitmap_btn_help, btnHelp_X, btnHelp_Y, \
+			btnHelp_Width, btnHelp_Height
+	.else
+		invoke drawImg, hBitmap_btn_help, \
+			btnHelp_X+btnPressedOffset_X, btnHelp_Y+btnPressedOffset_Y, \
+			btnHelp_Width, btnHelp_Height
+	.endif
+	ret
+drawOpeningBtns ENDP
+
+drawDeadBtns PROC
+	.if btnReplay_pressed == 0
+		invoke drawImg, hBitmap_btn_replay, btnReplay_X, btnReplay_Y, \
+			btnReplay_Width, btnReplay_Height
+	.else
+		invoke drawImg, hBitmap_btn_replay, \
+			btnReplay_X+btnPressedOffset_X, btnReplay_Y+btnPressedOffset_Y, \
+			btnReplay_Width, btnReplay_Height
+	.endif
+	ret
+drawDeadBtns ENDP
+
+mouseDownOpening PROC USES eax,
+	p:POINT
+
+	.if p.x >= btnEndless_X && p.x <= btnEndless_X + btnEndless_Width &&\
+		p.y >= btnEndless_Y && p.y <= btnEndless_Y + btnEndless_Height
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 1
+		mov btnEndless_pressed, al
+	.endif
+
+	.if p.x >= btnHelp_X && p.x <= btnHelp_X + btnHelp_Width &&\
+		p.y >= btnHelp_Y && p.y <= btnHelp_Y + btnHelp_Height
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 1
+		mov btnHelp_pressed, al
+	.endif
+
+	ret
+mouseDownOpening ENDP
+
+mouseDownDead PROC USES eax,
+	p:POINT
+
+	.if p.x >= btnReplay_X && p.x <= btnReplay_X + btnReplay_Width &&\
+		p.y >= btnReplay_Y && p.y <= btnReplay_Y + btnReplay_Height
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 1
+		mov btnReplay_pressed, al
+	.endif
+
+	ret
+mouseDownDead ENDP
+
+mouseUpOpening PROC USES eax
+	mov al, btnEndless_pressed
+	.if al != 0
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 0
+		mov btnEndless_pressed, al
+
+		mov game.state, LIVE
+	.endif
+	mov al, btnHelp_pressed
+	.if al != 0
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 0
+		mov btnHelp_pressed, al
+		mov eax, HELP
+		mov game.state, eax
+	.endif
+
+	ret
+mouseUpOpening ENDP
+
+mouseUpHelp PROC
+	mov eax, OPENING
+	mov game.state, eax
+	INVOKE InvalidateRect, NULL, NULL, FALSE
+	ret 
+mouseUpHelp ENDP
+
+mouseUpDead PROC USES eax
+
+	mov al, btnReplay_pressed
+	.if al != 0
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+		mov al, 0
+		mov btnReplay_pressed, al
+	.endif
+
+	ret
+mouseUpDead ENDP
+
+drawOpeningScreen PROC USES eax
+	invoke drawImg, hBitmap_bg, 0, 0, SCREEN_X, SCREEN_Y
+	invoke drawOpeningBtns
+
+	ret
+drawOpeningScreen ENDP
+
+drawHelpScreen PROC USES eax
+	invoke drawImg, hBitmap_help, 0, 0, SCREEN_X, SCREEN_Y
+	ret
+drawHelpScreen ENDP
+
+drawDeadScreen PROC USES eax,
+	score: DWORD,
+	bestScore:DWORD
+	LOCAL ps:PAINTSTRUCT 
+	invoke BeginPaint, hWnd, addr ps 
+
+	invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
+	invoke drawDeadBtns
+
+	invoke SetBkMode, ps.hdc, TRANSPARENT ;ÉèÖÃ±³¾°Í¸Ã÷
+	;µ÷Õû×ÖÌå
+	invoke CreateFont,deadScore_Height,0,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFont, eax
+	invoke SelectObject, ps.hdc, hFont
+	;×ª³É×Ö·û´®
+	invoke IntToStr, score
+	invoke SetTextColor, ps.hdc, 0050bdf0h
+	invoke StringLen, ADDR strBuffer
+	invoke TextOut, ps.hdc, score_X, score_Y, ADDR strBuffer, eax
+
+	invoke CreateFont,best_Height,0,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFont, eax
+	invoke SelectObject, ps.hdc, hFont
+	invoke SetTextColor, ps.hdc, 004c48eeh
+	invoke StringLen, ADDR bestStr
+	invoke TextOut, ps.hdc, best_X, best_Y, ADDR bestStr, eax
+
+	invoke IntToStr, bestScore
+	invoke StringLen, ADDR strBuffer
+	invoke TextOut, ps.hdc, bestScore_X, bestScore_Y, ADDR strBuffer, eax
+
+	
+	invoke EndPaint, hWnd, addr ps
+	ret
+drawDeadScreen ENDP
 
 IntToStr PROC USES eax ebx ecx edx,
 	val:DWORD
