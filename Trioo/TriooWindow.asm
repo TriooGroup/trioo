@@ -63,12 +63,12 @@ PlankRedFilePath BYTE "pic\trio_plank_red.bmp", 0
 PlankYellowFilePath BYTE "pic\trio_plank_yellow.bmp", 0
 PlankBlueFilePath BYTE "pic\trio_plank_blue.bmp", 0
 PlankGreenFilePath BYTE "pic\trio_plank_green.bmp", 0
-Halo1FilePath BYTE "pic\trio_key_halo_01_combine.bmp", 0
-Halo1MediumFilePath BYTE "pic\trio_key_halo_01_medium.bmp", 0
-Halo1SmallFilePath BYTE "pic\trio_key_halo_01_small.bmp", 0
-Halo2FilePath BYTE "pic\trio_key_halo_02_combine.bmp", 0
-Halo2MediumFilePath BYTE "pic\trio_key_halo_02_medium.bmp", 0
-Halo2SmallFilePath BYTE "pic\trio_key_halo_02_small.bmp", 0
+Halo1FilePath BYTE "pic\halo_01.bmp", 0
+Halo1MediumFilePath BYTE "pic\halo_01_medium.bmp", 0
+Halo1SmallFilePath BYTE "pic\halo_01_small.bmp", 0
+Halo2FilePath BYTE "pic\halo_02.bmp", 0
+Halo2MediumFilePath BYTE "pic\halo_02_medium.bmp", 0
+Halo2SmallFilePath BYTE "pic\halo_02_small.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -283,8 +283,6 @@ LOCAL positionX:DWORD
 
 		;÷–≤„»¶
 		mov edx, positionX
-		;add edx, 85
-		;invoke DrawCircle, edx, PLANK_Y-80, 16, hHalo1Medium
 		add edx, 250
 		invoke DrawCircle, edx, PLANK_Y-90, 16, hHalo1Medium
 
@@ -292,8 +290,6 @@ LOCAL positionX:DWORD
 		mov edx, positionX
 		add edx, 60
 		invoke DrawCross, edx, PLANK_Y-100, 14, hHalo2Medium
-		;add edx, 140
-		;invoke DrawCross, edx, PLANK_Y-110, 14, hHalo2Medium
 
 		;…œ≤„»¶
 		mov edx, positionX
@@ -320,14 +316,12 @@ DrawPlank ENDP
 
 DrawCircle PROC USES edx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 	invoke SelectObject, hMemDC, handle
-	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, side_length, 0, SRCAND
 	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, 0, 0, SRCPAINT
 	ret
 DrawCircle ENDP
 
 DrawCross PROC USES edx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 	invoke SelectObject, hMemDC, handle
-	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, side_length, 0, SRCAND
 	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, 0, 0, SRCPAINT
 	ret
 DrawCross ENDP
