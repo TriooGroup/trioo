@@ -50,6 +50,9 @@ hHalo1Small dd ?
 hHalo2 dd ?
 hHalo2Medium dd ?
 hHalo2Small dd ?
+hHalo2Rotated dd ?
+hHalo2RotatedMedium dd ?
+hHalo2RotatedSmall dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -70,6 +73,9 @@ Halo1SmallFilePath BYTE "pic\halo_01_small.bmp", 0
 Halo2FilePath BYTE "pic\halo_02.bmp", 0
 Halo2MediumFilePath BYTE "pic\halo_02_medium.bmp", 0
 Halo2SmallFilePath BYTE "pic\halo_02_small.bmp", 0
+Halo2RotatedFilePath BYTE "pic\halo_022.bmp", 0
+Halo2RotatedMediumFilePath BYTE "pic\halo_022_medium.bmp", 0
+Halo2RotatedSmallFilePath BYTE "pic\halo_022_small.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -223,6 +229,12 @@ InitImage PROC
 	mov hHalo2Medium, eax
 	invoke LoadImage, NULL, ADDR Halo2SmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo2Small, eax
+	invoke LoadImage, NULL, ADDR Halo2RotatedFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2Rotated, eax
+	invoke LoadImage, NULL, ADDR Halo2RotatedMediumFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2RotatedMedium, eax
+	invoke LoadImage, NULL, ADDR Halo2RotatedSmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHalo2RotatedSmall, eax
 
 	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg, eax
@@ -329,6 +341,7 @@ DrawBackground ENDP
 DrawPlank PROC
 LOCAL positionX:DWORD
 LOCAL floatingY:DWORD
+LOCAL tempHandle:DWORD
 	.IF game.activeCountdown > 0
 		.IF game.isActivated == RED
 			invoke SelectObject, hMemDC, hPlankRed
@@ -365,10 +378,10 @@ LOCAL floatingY:DWORD
 		imul ebx, FLOATING_DISTANCE
 		mov floatingY, ebx
 
-		mov ebx, PLANK_Y - 30
-		sub ebx, floatingY
 		;lower circles
 		mov edx, positionX
+		mov ebx, PLANK_Y - 30
+		sub ebx, floatingY
 		invoke DrawCircle, edx, ebx, 18, hHalo1
 		add edx, 140
 		mov ebx, PLANK_Y - 60
@@ -379,30 +392,12 @@ LOCAL floatingY:DWORD
 		sub ebx, floatingY
 		invoke DrawCircle, edx, ebx, 18, hHalo1
 
-		;lower crosses
-		mov edx, positionX
-		add edx, 85
-		mov ebx, PLANK_Y - 25
-		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 16, hHalo2 
-		add edx, 150
-		mov ebx, PLANK_Y - 45
-		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 16, hHalo2 
-
 		;middle circles
 		mov edx, positionX
 		add edx, 250
 		mov ebx, PLANK_Y - 90
 		sub ebx, floatingY
 		invoke DrawCircle, edx, ebx, 16, hHalo1Medium
-
-		;middle crosses
-		mov edx, positionX
-		add edx, 60
-		mov ebx, PLANK_Y - 100
-		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 14, hHalo2Medium
 
 		;upper circles
 		mov edx, positionX
@@ -419,21 +414,56 @@ LOCAL floatingY:DWORD
 		sub ebx, floatingY
 		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 
+		;lower crosses
+		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+			mov eax, hHalo2
+		.ELSE
+			mov eax, hHalo2Rotated
+		.ENDIF
+		mov tempHandle, eax
+		mov edx, positionX
+		add edx, 85
+		mov ebx, PLANK_Y - 25
+		sub ebx, floatingY	
+		invoke DrawCross, edx, ebx, 16, tempHandle 
+		add edx, 150
+		mov ebx, PLANK_Y - 45
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 16, tempHandle 
+
+		;middle crosses
+		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+			mov eax, hHalo2Medium
+		.ELSE
+			mov eax, hHalo2RotatedMedium
+		.ENDIF
+		mov tempHandle, eax
+		mov edx, positionX
+		add edx, 60
+		mov ebx, PLANK_Y - 100
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 14, tempHandle
+
 		;upper crosses
+		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+			mov eax, hHalo2Small
+		.ELSE
+			mov eax, hHalo2RotatedSmall
+		.ENDIF
+		mov tempHandle, eax
 		mov edx, positionX
 		add edx, 10
 		mov ebx, PLANK_Y - 160
 		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 12, hHalo2Small
+		invoke DrawCross, edx, ebx, 12, tempHandle
 		add edx, 180
 		mov ebx, PLANK_Y - 153
 		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 12, hHalo2Small
+		invoke DrawCross, edx, ebx, 12, tempHandle
 		add edx, 70
 		mov ebx, PLANK_Y - 135
 		sub ebx, floatingY
-		invoke DrawCross, edx, ebx, 12, hHalo2Small
-
+		invoke DrawCross, edx, ebx, 12, tempHandle
 	.ENDIF
 
 	ret
