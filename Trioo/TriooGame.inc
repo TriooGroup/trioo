@@ -13,6 +13,7 @@ Ball STRUCT
 	positionY SDWORD ?
 	velocityX SDWORD ?
 	velocityY SDWORD ?
+	speedType SDWORD ?
 	color DWORD ?
 	existed DWORD ?
 Ball ENDS

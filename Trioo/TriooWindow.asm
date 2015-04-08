@@ -244,12 +244,6 @@ InitImage ENDP
 InitData PROC
 
 	invoke startGame
-	mov game.plankPosition, 1
-	mov game.score, 123
-	mov game.state, OPENING
-	mov game.bestScore, 0
-	mov game.isActivated, YELLOW
-	mov game.activeCountdown, 4
 	ret
 InitData ENDP
 
