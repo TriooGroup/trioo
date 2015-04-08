@@ -175,7 +175,6 @@ InitInstance PROC
 	invoke InitImage
 	invoke InitData
 
-
 	INVOKE SetTimer, hWnd, 1, 50, NULL
 
 	INVOKE ShowWindow, hWnd, SW_SHOW
@@ -242,7 +241,6 @@ InitImage PROC
 InitImage ENDP
 
 InitData PROC
-
 	invoke startGame
 	ret
 InitData ENDP
@@ -330,6 +328,7 @@ DrawBackground ENDP
 
 DrawPlank PROC
 LOCAL positionX:DWORD
+LOCAL floatingY:DWORD
 	.IF game.activeCountdown > 0
 		.IF game.isActivated == RED
 			invoke SelectObject, hMemDC, hPlankRed
@@ -360,55 +359,87 @@ LOCAL positionX:DWORD
 
 	;Halo
 	.IF game.activeCountdown > 0
+	;calculate current floating distance
+		mov ebx, 4
+		sub ebx, game.activeCountdown
+		imul ebx, FLOATING_DISTANCE
+		mov floatingY, ebx
 
+		mov ebx, PLANK_Y - 30
+		sub ebx, floatingY
+		;lower circles
 		mov edx, positionX
-		invoke DrawCircle, edx, PLANK_Y - 30, 18, hHalo1
+		invoke DrawCircle, edx, ebx, 18, hHalo1
 		add edx, 140
-		invoke DrawCircle, edx, PLANK_Y - 60, 18, hHalo1
+		mov ebx, PLANK_Y - 60
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 18, hHalo1
 		add edx, 160
-		invoke DrawCircle, edx, PLANK_Y - 40, 18, hHalo1
+		mov ebx, PLANK_Y - 40
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 18, hHalo1
 
-
+		;lower crosses
 		mov edx, positionX
 		add edx, 85
-		invoke DrawCross, edx, PLANK_Y-25, 16, hHalo2 
+		mov ebx, PLANK_Y - 25
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 16, hHalo2 
 		add edx, 150
-		invoke DrawCross, edx, PLANK_Y-45, 16, hHalo2 
+		mov ebx, PLANK_Y - 45
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 16, hHalo2 
 
-
+		;middle circles
 		mov edx, positionX
 		add edx, 250
-		invoke DrawCircle, edx, PLANK_Y-90, 16, hHalo1Medium
+		mov ebx, PLANK_Y - 90
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 16, hHalo1Medium
 
-
+		;middle crosses
 		mov edx, positionX
 		add edx, 60
-		invoke DrawCross, edx, PLANK_Y-100, 14, hHalo2Medium
+		mov ebx, PLANK_Y - 100
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 14, hHalo2Medium
 
-
+		;upper circles
 		mov edx, positionX
 		add edx, 60
-		invoke DrawCross, edx, PLANK_Y-165, 14, hHalo1Small
+		mov ebx, PLANK_Y - 165
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 		add edx, 70
-		invoke DrawCross, edx, PLANK_Y-130, 14, hHalo1Small
+		mov ebx, PLANK_Y - 130
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 		add edx, 165
-		invoke DrawCross, edx, PLANK_Y-155, 14, hHalo1Small
+		mov ebx, PLANK_Y - 155
+		sub ebx, floatingY
+		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 
-
+		;upper crosses
 		mov edx, positionX
 		add edx, 10
-		invoke DrawCross, edx, PLANK_Y-160, 12, hHalo2Small
+		mov ebx, PLANK_Y - 160
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 12, hHalo2Small
 		add edx, 180
-		invoke DrawCross, edx, PLANK_Y-153, 12, hHalo2Small
+		mov ebx, PLANK_Y - 153
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 12, hHalo2Small
 		add edx, 70
-		invoke DrawCross, edx, PLANK_Y-135, 12, hHalo2Small
+		mov ebx, PLANK_Y - 135
+		sub ebx, floatingY
+		invoke DrawCross, edx, ebx, 12, hHalo2Small
 
 	.ENDIF
 
 	ret
 DrawPlank ENDP
 
-DrawCircle PROC USES edx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
+DrawCircle PROC USES edx ebx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 	invoke SelectObject, hMemDC, handle
 	invoke BitBlt, hDC, pos_x, pos_y, side_length, side_length, hMemDC, 0, 0, SRCPAINT
 	ret
