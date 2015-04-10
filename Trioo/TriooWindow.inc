@@ -10,10 +10,12 @@ InitImage PROTO
 InitData PROTO
 
 DrawPlayingScreen PROTO
+DrawPauseScreen PROTO
 DrawBackground PROTO
 DrawBalls PROTO
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
 DrawPlank PROTO
+DrawHalo PROTO
 DrawCircle PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawCross PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawScore PROTO

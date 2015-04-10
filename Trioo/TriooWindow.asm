@@ -276,6 +276,8 @@ SAVE:
 
 		.IF game.state == LIVE
 			invoke DrawPlayingScreen
+		.ELSEIF game.state == PAUSED
+			invoke DrawPauseScreen
 		.ELSEIF game.state == OPENING
 			invoke drawOpeningScreen
 		.ELSEIF game.state == HELP
@@ -289,6 +291,15 @@ SAVE:
 		INVOKE EndPaint, lhwnd, ADDR ps
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYDOWN
+		.IF wParam == VK_SPACE
+			.IF game.state == LIVE
+				mov game.state, PAUSED
+			.ELSEIF game.state == PAUSED
+				mov game.state, LIVE
+			.ENDIF
+			invoke InvalidateRect, hWnd, NULL, FALSE
+			ret
+		.ENDIF
 		.IF game.state == LIVE
 			.IF wParam == VK_LEFT
 				invoke movePlank, 1
@@ -339,11 +350,17 @@ WndProc ENDP
 
 DrawPlayingScreen PROC
 	invoke DrawBackground
+	invoke DrawHalo
 	invoke DrawBalls
 	invoke DrawPlank
 	invoke DrawScore
 	ret
 DrawPlayingScreen ENDP
+
+DrawPauseScreen PROC
+	invoke DrawPlayingScreen
+	ret
+DrawPauseScreen ENDP
 
 DrawBackground PROC
 	invoke SelectObject, hMemDC, hBackground
@@ -384,7 +401,21 @@ LOCAL tempHandle:DWORD
 	invoke BitBlt, hDC, positionX, PLANK_Y + 16, 160, 160, \
 		hMemDC, 0, 0, SRCAND
 
-	;Halo
+	ret
+DrawPlank ENDP
+
+DrawHalo PROC USES eax ebx edx
+LOCAL positionX:DWORD
+LOCAL floatingY:DWORD
+LOCAL tempHandle:DWORD
+	.IF game.plankPosition == 1
+		mov positionX, PLANK_X1
+	.ELSEIF game.plankPosition == 2
+		mov positionX, PLANK_X2
+	.ELSE
+		mov positionX, PLANK_X3
+	.ENDIF
+
 	.IF game.activeCountdown > 0
 	;calculate current floating distance
 		mov ebx, 4
@@ -481,7 +512,7 @@ LOCAL tempHandle:DWORD
 	.ENDIF
 
 	ret
-DrawPlank ENDP
+DrawHalo ENDP
 
 DrawCircle PROC USES edx ebx, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 	invoke SelectObject, hMemDC, handle
