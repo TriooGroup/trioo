@@ -290,7 +290,20 @@ SAVE:
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYDOWN
 		.IF game.state == LIVE
-			invoke KeyDownProc, localMsg, wParam, lParam	
+			.IF wParam == VK_LEFT
+				invoke movePlank, 1
+				ret
+			.ELSEIF wParam == VK_DOWN
+				invoke movePlank, 2
+				ret
+			.ELSEIF wParam == VK_RIGHT
+				invoke movePlank, 3
+				ret
+			.ELSE
+				jmp default
+			.ENDIF
+		.ELSE
+			jmp default
 		.ENDIF
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_KEYUP	
@@ -316,6 +329,7 @@ SAVE:
 		INVOKE ExitProcess, 0
 		jmp WndProcExit
 	.ELSE
+default:
 		INVOKE DefWindowProc, lhwnd, localMsg, wParam, lParam
 	.ENDIF
 	
