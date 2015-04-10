@@ -40,6 +40,9 @@ L1:
 startGame ENDP
 
 step PROC USES edi
+	.IF game.state != LIVE
+		ret
+	.ENDIF
 	mov eax, 100
 	call RandomRange
 	cmp eax, 1
@@ -106,11 +109,10 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 		add game.ball[edi].positionY, eax
 		.IF game.ball[edi].positionY > PLANK_Y - DIMETER
 			mov ebx, game.ball[edi].positionX
-			.IF (ebx > PLANK_X1 - RADIUS) && (ebx < PLANK_X2 - RADIUS) && (game.plankPosition != 1)
-				ret
-			.ELSEIF (ebx > PLANK_X2 - RADIUS) && (ebx < PLANK_X3 - RADIUS) && (game.plankPosition != 2)
-				ret
-			.ELSEIF (ebx > PLANK_X3 - RADIUS) && (game.plankPosition != 3)
+			.IF ((ebx > PLANK_X1 - RADIUS) && (ebx < PLANK_X2 - RADIUS) && (game.plankPosition != 1)) || \
+				((ebx > PLANK_X2 - RADIUS) && (ebx < PLANK_X3 - RADIUS) && (game.plankPosition != 2)) || \
+				((ebx > PLANK_X3 - RADIUS) && (game.plankPosition != 3))
+				mov game.state, DEAD
 				ret
 			.ELSE
 				.IF ((ebx < PLANK_X2) && (game.ball[edi].velocityX > 0) || (ebx > PLANK_X3) && (game.ball[edi].velocityX < 0))
