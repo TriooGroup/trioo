@@ -53,6 +53,12 @@ hHalo2Small dd ?
 hHalo2Rotated dd ?
 hHalo2RotatedMedium dd ?
 hHalo2RotatedSmall dd ?
+hPauseCover dd ?
+hButtonMusic dd ?
+hButtonSound dd ?
+hButtonReplay dd ?
+hButtonHome dd ?
+hButtonPlay dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
@@ -76,6 +82,15 @@ Halo2SmallFilePath BYTE "pic\halo_02_small.bmp", 0
 Halo2RotatedFilePath BYTE "pic\halo_022.bmp", 0
 Halo2RotatedMediumFilePath BYTE "pic\halo_022_medium.bmp", 0
 Halo2RotatedSmallFilePath BYTE "pic\halo_022_small.bmp", 0
+PauseCoverFilePath BYTE "pic\pause_cover.bmp", 0
+ButtonMusicFilePath BYTE "pic\trio_button_music.bmp", 0
+ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
+ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
+ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
+ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
+PAUSE_POSITION0 equ 210
+PAUSE_STEP equ 150
+
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -235,6 +250,18 @@ InitImage PROC
 	mov hHalo2RotatedMedium, eax
 	invoke LoadImage, NULL, ADDR Halo2RotatedSmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo2RotatedSmall, eax
+	invoke LoadImage, NULL, ADDR PauseCoverFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPauseCover, eax
+	invoke LoadImage, NULL, ADDR ButtonSoundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hButtonSound, eax
+	invoke LoadImage, NULL, ADDR ButtonMusicFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hButtonMusic, eax
+	invoke LoadImage, NULL, ADDR ButtonReplayFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hButtonReplay, eax
+	invoke LoadImage, NULL, ADDR ButtonHomeFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hButtonHome, eax
+	invoke LoadImage, NULL, ADDR ButtonPlayFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hButtonPlay, eax
 
 	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg, eax
@@ -265,7 +292,7 @@ SAVE:
 	.ELSEIF localMsg == WM_TIMER
 		.IF game.state == LIVE
 			invoke step
-			INVOKE InvalidateRect, hWnd, NULL, FALSE
+			invoke InvalidateRect, hWnd, NULL, FALSE
 		.ENDIF
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
@@ -294,6 +321,7 @@ SAVE:
 		.IF wParam == VK_SPACE
 			.IF game.state == LIVE
 				mov game.state, PAUSED
+				invoke InvalidateRect, hWnd, NULL, FALSE
 			.ELSEIF game.state == PAUSED
 				mov game.state, LIVE
 			.ENDIF
@@ -358,6 +386,19 @@ DrawPlayingScreen ENDP
 
 DrawPauseScreen PROC
 	invoke DrawPlayingScreen
+	invoke SelectObject, hMemDC, hPauseCover
+	invoke BitBlt, hDC, 0, 0, SCREEN_X, SCREEN_Y, hMemDC, 0, 0, SRCAND
+
+	invoke SelectObject, hMemDC, hButtonMusic
+	invoke BitBlt, hDC, PAUSE_POSITION0, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	invoke SelectObject, hMemDC, hButtonSound
+	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	invoke SelectObject, hMemDC, hButtonReplay
+	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP*2, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	invoke SelectObject, hMemDC, hButtonHome
+	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP*3, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	invoke SelectObject, hMemDC, hButtonPlay
+	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP*4, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
 	ret
 DrawPauseScreen ENDP
 
