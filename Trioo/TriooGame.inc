@@ -23,7 +23,7 @@ Game STRUCT
 	plankPosition DWORD ?
 	score DWORD ?
 	state DWORD ?
-	bestScore DWORD ?
+	bestScore DWORD 0
 	isActivated DWORD ?
 	activeCountdown DWORD ?
 	gravity DWORD ?
@@ -48,7 +48,7 @@ PLANK_HEIGHT = 16
 DIMETER = 47
 RADIUS = 24
 FLOATING_DISTANCE = 3
-
+MAX_COUNTDOWN = 4
 startGame PROTO
 step PROTO 
 movePlank PROTO, position: DWORD

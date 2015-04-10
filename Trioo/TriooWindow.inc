@@ -21,6 +21,9 @@ DrawCross PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawScore PROTO
 KeyDownProc PROTO, localMsg: DWORD, wParam: DWORD, lParam: DWORD
 
+jmpToOpening PROTO
+jmpToLive PROTO
+
 drawOpeningScreen PROTO
 drawDeadScreen PROTO score:DWORD, bestScore:DWORD
 drawHelpScreen PROTO

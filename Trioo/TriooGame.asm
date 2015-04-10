@@ -24,8 +24,8 @@ SpeedType ENDS
 startGame PROC
 	mov game.plankPosition, 1
 	mov game.score, 0
-	mov game.state, OPENING
-	mov game.bestScore, 0
+	;mov game.state, OPENING
+	;mov game.bestScore, 0
 	mov game.isActivated, YELLOW
 	mov game.activeCountdown, 0
 	mov game.minInterval, 7
@@ -134,6 +134,10 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				((ebx > PLANK_X2 - RADIUS) && (ebx < PLANK_X3 - RADIUS) && (game.plankPosition != 2)) || \
 				((ebx > PLANK_X3 - RADIUS) && (game.plankPosition != 3))
 				mov game.state, DEAD
+				mov eax, game.score
+				.IF eax > game.bestScore					
+					mov game.bestScore, eax
+				.ENDIF
 				ret
 			.ELSE
 				.IF ((ebx < PLANK_X2) && (game.ball[edi].velocityX > 0) || (ebx > PLANK_X3) && (game.ball[edi].velocityX < 0))
@@ -147,7 +151,7 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				mov game.ball[edi].positionY, eax
 				mov eax, game.ball[edi].color
 				mov game.isActivated, eax
-				mov game.activeCountdown, 4
+				mov game.activeCountdown, MAX_COUNTDOWN
 				add game.score, 1
 			.ENDIF
 		.ENDIF

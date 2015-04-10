@@ -24,12 +24,18 @@
     <MASM Include="TriooGame.asm">
       <Filter>源文件</Filter>
     </MASM>
+    <MASM Include="sound.asm">
+      <Filter>源文件</Filter>
+    </MASM>
   </ItemGroup>
   <ItemGroup>
     <None Include="TriooWindow.inc">
       <Filter>头文件</Filter>
     </None>
     <None Include="TriooGame.inc">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="sound.inc">
       <Filter>头文件</Filter>
     </None>
   </ItemGroup>
