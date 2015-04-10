@@ -82,7 +82,7 @@ Halo2SmallFilePath BYTE "pic\halo_02_small.bmp", 0
 Halo2RotatedFilePath BYTE "pic\halo_022.bmp", 0
 Halo2RotatedMediumFilePath BYTE "pic\halo_022_medium.bmp", 0
 Halo2RotatedSmallFilePath BYTE "pic\halo_022_small.bmp", 0
-PauseCoverFilePath BYTE "pic\pause_cover.bmp", 0
+PauseCoverFilePath BYTE "pic\pause_cover2.bmp", 0
 ButtonMusicFilePath BYTE "pic\trio_button_music.bmp", 0
 ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
