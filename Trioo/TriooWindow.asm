@@ -297,7 +297,6 @@ SAVE:
 			.ELSEIF game.state == PAUSED
 				mov game.state, LIVE
 			.ENDIF
-			invoke InvalidateRect, hWnd, NULL, FALSE
 			ret
 		.ENDIF
 		.IF game.state == LIVE
