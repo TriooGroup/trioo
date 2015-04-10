@@ -28,8 +28,10 @@ startGame PROC
 	mov game.bestScore, 0
 	mov game.isActivated, YELLOW
 	mov game.activeCountdown, 0
-
+	mov game.minInterval, 7
 	mov game.gravity, 1
+	mov game.nextBall, 1
+	mov game.ballNumber, 0
 	call Randomize
 	mov ecx, MAX_NUM
 	mov edi, 0
@@ -43,11 +45,19 @@ step PROC USES edi
 	.IF game.state != LIVE
 		ret
 	.ENDIF
-	mov eax, 100
-	call RandomRange
-	cmp eax, 1
-	jg L2
-	invoke generateBall
+	mov eax, game.minInterval
+	.IF game.nextBall == eax
+		mov game.nextBall, 0
+		.IF game.ballNumber == 0
+			invoke generateBall
+			jg L2
+		.ENDIF
+		mov eax, 1000
+		call RandomRange
+		cmp eax, 100
+		jg L2
+		invoke generateBall
+	.ENDIF
 L2:
 	.IF game.activeCountdown > 0
 		sub game.activeCountdown, 1
@@ -61,6 +71,7 @@ L3:
 	invoke moveOneBall, edi
 	add edi, 1
 	loop L3
+	add game.nextBall, 1
 	ret
 step ENDP
 
@@ -68,9 +79,13 @@ generateBall PROC USES edi ecx ebx
 	mov ecx, MAX_NUM
 	mov edi, 0
 L1:
-	.IF game.ball[edi].existed == 1
+	.IF game.ball[edi].existed == 0
 		jmp L2
 	.ENDIF
+	add edi, TYPE Ball
+	loop L1
+	ret
+L2:
 	mov game.ball[edi].positionX, -DIMETER
 	mov game.ball[edi].positionY, 0
 	mov eax, PARA_NUM
@@ -83,12 +98,18 @@ L1:
 	mov game.ball[edi].velocityX, ebx
 	mov ebx, speedTypes[eax].velocityY0
 	mov game.ball[edi].velocityY, ebx
-	mov game.ball[edi].color, RED
+	mov eax, 4
+	call RandomRange
+	add eax, 1
+	mov game.ball[edi].color, eax
+	mov eax, 2
+	call RandomRange
+	.IF eax == 1
+		neg game.ball[edi].velocityX
+		mov game.ball[edi].positionX, SCREEN_X
+	.ENDIF
 	mov game.ball[edi].existed, 1
-	ret
-L2:
-	add edi, TYPE Ball
-	loop L1
+	add game.ballNumber, 1
 	ret
 generateBall ENDP
 
@@ -127,10 +148,12 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				mov eax, game.ball[edi].color
 				mov game.isActivated, eax
 				mov game.activeCountdown, 4
+				add game.score, 1
 			.ENDIF
 		.ENDIF
 		.IF (game.ball[edi].positionX > SCREEN_X) || (game.ball[edi].positionX < 0 - DIMETER)
 			mov game.ball[edi].existed, 0
+			sub game.ballNumber, 1
 		.ENDIF
 	.ENDIF
 	ret

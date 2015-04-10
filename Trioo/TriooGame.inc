@@ -27,6 +27,9 @@ Game STRUCT
 	isActivated DWORD ?
 	activeCountdown DWORD ?
 	gravity DWORD ?
+	minInterval DWORD ?
+	nextBall DWORD ?
+	ballNumber DWORD ?
 Game ENDS
 
 RED EQU 1
