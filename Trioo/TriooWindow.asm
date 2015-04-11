@@ -90,6 +90,7 @@ ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
 IconFilePath BYTE "pic\Icon.bmp", 0
+bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp"
 
 
 strBuffer BYTE 20 DUP (0)
@@ -158,6 +159,7 @@ hBitmap_bg dd ?
 hBitmap_btn_endless dd ?
 hBitmap_btn_help dd ?
 hBitmap_bg_dead dd ?
+hBitmap_bg_dead_congrat dd ?
 hBitmap_btn_replay dd ?
 hBitmap_help dd ?
 hBitmap_btn_home dd ?
@@ -288,6 +290,8 @@ InitImage PROC
 	mov hBitmap_btn_endless, eax
 	INVOKE LoadImage, NULL, ADDR bgImgDeadPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg_dead, eax
+	INVOKE LoadImage, NULL, ADDR bgImgDeadCongratPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_bg_dead_congrat, eax
 	INVOKE LoadImage, NULL, ADDR btnReplayPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_btn_replay, eax
 	INVOKE LoadImage, NULL, ADDR bgImgHelpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
@@ -908,7 +912,14 @@ drawDeadScreen PROC USES eax,
 	score: DWORD,
 	bestScore:DWORD
 
-	invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
+	mov eax, game.score
+	.if eax == game.bestScore && eax != 0
+		invoke drawImg, hBitmap_bg_dead_congrat, 0, 0, SCREEN_X, SCREEN_Y
+		invoke playbest
+	.else
+		invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
+	.endif
+	
 	invoke drawDeadBtns
 
 	invoke SetBkMode, hDC, TRANSPARENT
