@@ -16,7 +16,7 @@ DrawBalls PROTO
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
 DrawPlank PROTO
 DrawExtraPlank PROTO
-DrawHalo PROTO
+DrawHalo PROTO, plankPosition:DWORD, activeCountdown:DWORD
 DrawCircle PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawCross PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawScore PROTO

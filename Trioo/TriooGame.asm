@@ -157,6 +157,14 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				ret
 			.ELSE
+				.IF edx == game.extraPosition
+					mov game.isExtraActivated, 1
+					mov game.extraActiveCountdown, MAX_COUNTDOWN
+				.ELSE
+					mov eax, game.ball[edi].color
+					mov game.isActivated, eax
+					mov game.activeCountdown, MAX_COUNTDOWN
+				.ENDIF
 				.IF ((edx == 1) && (game.ball[edi].velocityX > 0)) || ((edx == 3) && (game.ball[edi].velocityX < 0))
 					mov ebx, game.ball[edi].speedType
 					mov eax, TYPE SpeedType
@@ -174,14 +182,7 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				mov eax, game.currentLevel
 				add eax, 1
 				mov ebx, levelUpScore[eax * 4]
-				.IF edx == game.extraPosition
-					mov game.isExtraActivated, 1
-					mov game.extraActiveCountdown, MAX_COUNTDOWN
-				.ELSE
-					mov eax, game.ball[edi].color
-					mov game.isActivated, eax
-					mov game.activeCountdown, MAX_COUNTDOWN
-				.ENDIF
+				
 				.IF eax < 3 && ebx < game.score
 					mov game.currentLevel, eax
 					mov ebx, minIntervalArray[eax * 4]

@@ -421,7 +421,8 @@ jmpToLive ENDP
 
 DrawPlayingScreen PROC
 	invoke DrawBackground
-	invoke DrawHalo
+	invoke DrawHalo, game.plankPosition, game.activeCountdown
+	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
 	invoke DrawExtraPlank
 	invoke DrawBalls
 	invoke DrawPlank
@@ -531,9 +532,9 @@ LOCAL positionX:DWORD
 			mov eax, 0
 			mov edx, 0
 			mov eax, game.extraPlankCountdown
-			mov ecx, 50
+			mov ecx, 10
 			div ecx
-			.IF edx < 25 ;show
+			.IF edx < 5 ;show
 				invoke SelectObject, hMemDC, hExtraPlank
 				invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
 			.ENDIF
@@ -550,28 +551,28 @@ LOCAL positionX:DWORD
 			mov ecx, EXTRA_PLANK_TIME
 			sub ecx, EXTRA_PLANK_ALERT_TIME
 			div ecx
-			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCCOPY
+			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCPAINT
 		.ENDIF
 	.ENDIF
 	ret
 DrawExtraPlank ENDP
 
-DrawHalo PROC USES eax ebx edx
+DrawHalo PROC USES eax ebx edx, plankPosition:DWORD, activeCountdown:DWORD
 LOCAL positionX:DWORD
 LOCAL floatingY:DWORD
 LOCAL tempHandle:DWORD
-	.IF game.plankPosition == 1
+	.IF plankPosition == 1
 		mov positionX, PLANK_X1
-	.ELSEIF game.plankPosition == 2
+	.ELSEIF plankPosition == 2
 		mov positionX, PLANK_X2
 	.ELSE
 		mov positionX, PLANK_X3
 	.ENDIF
 
-	.IF game.activeCountdown > 0
+	.IF activeCountdown > 0
 	;calculate current floating distance
 		mov ebx, 4
-		sub ebx, game.activeCountdown
+		sub ebx, activeCountdown
 		imul ebx, FLOATING_DISTANCE
 		mov floatingY, ebx
 
@@ -612,7 +613,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 
 		;lower crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2
 		.ELSE
 			mov eax, hHalo2Rotated
@@ -629,7 +630,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCross, edx, ebx, 16, tempHandle 
 
 		;middle crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2Medium
 		.ELSE
 			mov eax, hHalo2RotatedMedium
@@ -642,7 +643,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCross, edx, ebx, 14, tempHandle
 
 		;upper crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2Small
 		.ELSE
 			mov eax, hHalo2RotatedSmall
