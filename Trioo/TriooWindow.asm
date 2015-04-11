@@ -331,13 +331,13 @@ SAVE:
 			ret
 		.ENDIF
 		.IF game.state == LIVE
-			.IF wParam == VK_LEFT
+			.IF wParam == VK_J
 				invoke movePlank, 1
 				ret
-			.ELSEIF wParam == VK_DOWN
+			.ELSEIF wParam == VK_K
 				invoke movePlank, 2
 				ret
-			.ELSEIF wParam == VK_RIGHT
+			.ELSEIF wParam == VK_L
 				invoke movePlank, 3
 				ret
 			.ELSE
@@ -661,13 +661,13 @@ LOCAL shadow_pos_y:DWORD
 DrawOneBall ENDP
 
 KeyDownProc PROC, localMsg: DWORD, wParam: DWORD, lParam: DWORD
-	.IF wParam == VK_LEFT
+	.IF wParam == VK_J
 		invoke movePlank, 1
 		ret
-	.ELSEIF wParam == VK_DOWN
+	.ELSEIF wParam == VK_K
 		invoke movePlank, 2
 		ret
-	.ELSEIF wParam == VK_RIGHT
+	.ELSEIF wParam == VK_L
 		invoke movePlank, 3
 		ret
 	.ENDIF
