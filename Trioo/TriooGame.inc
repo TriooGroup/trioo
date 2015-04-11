@@ -25,7 +25,9 @@ Game STRUCT
 	state DWORD ?
 	bestScore DWORD 0
 	isActivated DWORD ?
+	isExtraActivated DWORD ?
 	activeCountdown DWORD ?
+	extraActiveCountdown DWORD ?
 	gravity DWORD ?
 	minInterval DWORD ?
 	maxInterval DWORD ?
@@ -33,6 +35,7 @@ Game STRUCT
 	ballNumber DWORD ?
 	extraPlankState DWORD ? ;0表示没有，1表示在下落，2表示有效期间
 	extraPlankHeight DWORD ?
+	extraPlankVelocity DWORD ?
 	extraPosition DWORD ? ;1/2/3表示位置
 	extraPlankCountdown DWORD ? 
 	currentLevel DWORD ?
@@ -55,7 +58,8 @@ DIMETER = 47
 RADIUS = 24
 FLOATING_DISTANCE = 3
 MAX_COUNTDOWN = 4
-EXTRA_PLANK_TIME = 150
+EXTRA_PLANK_TIME = 300
+EXTRA_PLANK_ALERT_TIME = 100
 startGame PROTO
 step PROTO 
 movePlank PROTO, position: DWORD

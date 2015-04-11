@@ -60,6 +60,9 @@ hButtonReplay dd ?
 hButtonHome dd ?
 hButtonPlay dd ?
 hIcon dd ?
+hExtraPlank dd ?
+hExtraPlankFallDown dd ?
+
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -91,6 +94,8 @@ ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
 IconFilePath BYTE "pic\Icon.bmp", 0
 bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp"
+ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
+ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
 
 
 strBuffer BYTE 20 DUP (0)
@@ -283,6 +288,10 @@ InitImage PROC
 	mov hButtonHome, eax
 	invoke LoadImage, NULL, ADDR ButtonPlayFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hButtonPlay, eax
+	invoke LoadImage, NULL, ADDR ExtraPlankFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hExtraPlank, eax
+	invoke LoadImage, NULL, ADDR ExtraPlankFallDownFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hExtraPlankFallDown, eax
 
 	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg, eax
@@ -424,7 +433,9 @@ jmpToLive ENDP
 
 DrawPlayingScreen PROC
 	invoke DrawBackground
-	invoke DrawHalo
+	invoke DrawHalo, game.plankPosition, game.activeCountdown
+	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
+	invoke DrawExtraPlank
 	invoke DrawBalls
 	invoke DrawPlank
 	invoke DrawScore
@@ -505,22 +516,75 @@ LOCAL tempHandle:DWORD
 	ret
 DrawPlank ENDP
 
-DrawHalo PROC USES eax ebx edx
+DrawExtraPlank PROC
+LOCAL positionX:DWORD
+	.IF game.extraPlankState == 0;no extra plank
+		ret
+	.ELSEIF game.extraPlankState == 1;falling down
+		.IF game.extraPosition == 1
+			mov positionX, PLANK_X1
+		.ELSEIF game.extraPosition == 2
+			mov positionX, PLANK_X2
+		.ELSE
+			mov positionX, PLANK_X3
+		.ENDIF
+
+		invoke SelectObject, hMemDC, hExtraPlankFallDown
+		invoke BitBlt, hDC, positionX, game.extraPlankHeight, 320, 16, hMemDC, 0, 0, SRCPAINT
+	.ELSEIF game.extraPlankState == 2 ;valid
+		.IF game.extraPosition == 1
+			mov positionX, PLANK_X1
+		.ELSEIF game.extraPosition == 2
+			mov positionX, PLANK_X2
+		.ELSE
+			mov positionX, PLANK_X3
+		.ENDIF
+
+		.IF game.extraPlankCountdown < EXTRA_PLANK_ALERT_TIME ;blink
+			mov eax, 0
+			mov edx, 0
+			mov eax, game.extraPlankCountdown
+			mov ecx, 10
+			div ecx
+			.IF edx < 5 ;show
+				invoke SelectObject, hMemDC, hExtraPlank
+				invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
+			.ENDIF
+		.ELSE ;countdown
+			invoke SelectObject, hMemDC, hExtraPlank
+			invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
+
+			;countdown bar
+			invoke SelectObject, hMemDC, hBuffer
+			mov eax, game.extraPlankCountdown
+			sub eax, EXTRA_PLANK_ALERT_TIME
+			imul eax, 310
+			mov edx, 0
+			mov ecx, EXTRA_PLANK_TIME
+			sub ecx, EXTRA_PLANK_ALERT_TIME
+			div ecx
+			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCPAINT
+		.ENDIF
+	.ENDIF
+	ret
+DrawExtraPlank ENDP
+
+DrawHalo PROC USES eax ebx edx, plankPosition:DWORD, activeCountdown:DWORD
 LOCAL positionX:DWORD
 LOCAL floatingY:DWORD
 LOCAL tempHandle:DWORD
-	.IF game.plankPosition == 1
+	.IF plankPosition == 1
 		mov positionX, PLANK_X1
-	.ELSEIF game.plankPosition == 2
+	.ELSEIF plankPosition == 2
 		mov positionX, PLANK_X2
 	.ELSE
 		mov positionX, PLANK_X3
 	.ENDIF
 
-	.IF game.activeCountdown > 0
+	.IF activeCountdown > 0
 	;calculate current floating distance
 		mov ebx, 4
-		sub ebx, game.activeCountdown
+		sub ebx, activeCountdown
 		imul ebx, FLOATING_DISTANCE
 		mov floatingY, ebx
 
@@ -561,7 +625,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCircle, edx, ebx, 14, hHalo1Small
 
 		;lower crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2
 		.ELSE
 			mov eax, hHalo2Rotated
@@ -578,7 +642,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCross, edx, ebx, 16, tempHandle 
 
 		;middle crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2Medium
 		.ELSE
 			mov eax, hHalo2RotatedMedium
@@ -591,7 +655,7 @@ LOCAL tempHandle:DWORD
 		invoke DrawCross, edx, ebx, 14, tempHandle
 
 		;upper crosses
-		.IF game.activeCountdown == 2 || game.activeCountdown == 4
+		.IF activeCountdown == 2 || activeCountdown == 4
 			mov eax, hHalo2Small
 		.ELSE
 			mov eax, hHalo2RotatedSmall
