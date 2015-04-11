@@ -100,6 +100,15 @@ bgImgHelpPath BYTE "pic\help.bmp", 0
 
 PAUSE_POSITION0 equ 210
 PAUSE_STEP equ 150
+btnPauseMusic_X equ PAUSE_POSITION0
+btnPauseSound_X equ PAUSE_POSITION0+PAUSE_STEP
+btnPauseReplay_X equ PAUSE_POSITION0+2*PAUSE_STEP
+btnPauseHome_X equ PAUSE_POSITION0+3*PAUSE_STEP
+btnPausePlay_X equ PAUSE_POSITION0+4*PAUSE_STEP
+btnPause_Y equ 267
+btnPause_Width equ 84
+btnPause_Height equ 87
+
 
 btnEndlessPath BYTE "pic\btnEndless.bmp", 0
 btnEndless_X equ 600
@@ -116,8 +125,8 @@ btnHelp_Height equ 124
 btnHelp_pressed BYTE 0
 
 btnHomePath BYTE "pic\home.bmp", 0
-btnHome_X equ 50
-btnHome_Y equ 50
+btnHome_X equ 20
+btnHome_Y equ 20
 btnHome_Width equ 124
 btnHome_Height equ 124
 btnHome_pressed BYTE 0
@@ -152,6 +161,7 @@ hBitmap_btn_home dd ?
 bestStr BYTE "Best", 0
 
 extern game: Game
+extern gamesound: GameSound
 
 .code
 InitInstance PROC
@@ -294,6 +304,10 @@ SAVE:
 	.ELSEIF localMsg == WM_TIMER
 		.IF game.state == LIVE
 			invoke step
+			.IF game.state == DEAD
+				invoke playcrash
+				invoke closeMusic
+			.ENDIF 
 			invoke InvalidateRect, hWnd, NULL, FALSE
 		.ENDIF
 		jmp WndProcExit
@@ -359,6 +373,9 @@ SAVE:
 			invoke mouseDownOpening, hitpoint
 		.ELSEIF game.state == DEAD 
 			invoke mouseDownDead, hitpoint
+		.ELSEIF game.state == PAUSED
+			invoke mouseDownPause, hitpoint
+		.ELSE
 		.ENDIF
 	.ELSEIF localMsg == WM_LBUTTONUP
 		.IF game.state == OPENING
@@ -410,8 +427,18 @@ DrawPauseScreen PROC
 
 	invoke SelectObject, hMemDC, hButtonMusic
 	invoke BitBlt, hDC, PAUSE_POSITION0, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	.if gamesound.playMusic == 0
+		invoke SelectObject, hMemDC, hPauseCover
+		invoke BitBlt, hDC, PAUSE_POSITION0, 267, 84, 87, hMemDC, 0, 0, SRCAND
+	.endif
+
 	invoke SelectObject, hMemDC, hButtonSound
 	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
+	.if gamesound.playSound == 0
+		invoke SelectObject, hMemDC, hPauseCover
+		invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP, 267, 84, 87, hMemDC, 0, 0, SRCAND
+	.endif
+
 	invoke SelectObject, hMemDC, hButtonReplay
 	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP*2, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
 	invoke SelectObject, hMemDC, hButtonHome
@@ -723,6 +750,50 @@ drawDeadBtns PROC
 	ret
 drawDeadBtns ENDP
 
+mouseDownPause PROC USES eax,
+	p:POINT
+
+	.if p.x >= btnPauseMusic_X && p.x <= btnPauseMusic_X + btnPause_Width &&\
+		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
+		.if gamesound.playMusic == 1
+			INVOKE closeMusic
+			mov gamesound.playMusic, 0
+		.else
+			mov gamesound.playMusic, 1
+			INVOKE playBGM_02
+		.endif
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+	.endif
+
+	.if p.x >= btnPauseSound_X && p.x <= btnPauseSound_X + btnPause_Width &&\
+		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
+		.if gamesound.playSound == 1
+			mov gamesound.playSound, 0
+		.else
+			mov gamesound.playSound, 1
+		.endif
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+	.endif
+
+	.if p.x >= btnPauseReplay_X && p.x <= btnPauseReplay_X + btnPause_Width &&\
+		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
+		mov game.state, LIVE
+	.endif
+
+	.if p.x >= btnPauseHome_X && p.x <= btnPauseHome_X + btnPause_Width &&\
+		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
+		invoke jmpToOpening
+		INVOKE InvalidateRect, NULL, NULL, FALSE
+	.endif
+
+	.if p.x >= btnPausePlay_X && p.x <= btnPausePlay_X + btnPause_Width &&\
+		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
+		;INVOKE InvalidateRect, NULL, NULL, FALSE
+		invoke jmpToLive
+	.endif
+	ret
+mouseDownPause ENDP
+
 mouseDownOpening PROC USES eax,
 	p:POINT
 
@@ -765,20 +836,20 @@ mouseDownDead ENDP
 
 mouseUpOpening PROC USES eax
 	mov al, btnEndless_pressed
-	.if al != 0
-		INVOKE InvalidateRect, NULL, NULL, FALSE
+	.if al != 0		
 		mov al, 0
 		mov btnEndless_pressed, al
 
 		invoke jmpToLive
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 	mov al, btnHelp_pressed
 	.if al != 0
-		INVOKE InvalidateRect, NULL, NULL, FALSE
 		mov al, 0
 		mov btnHelp_pressed, al
 		mov eax, HELP
 		mov game.state, eax
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 
 	ret
