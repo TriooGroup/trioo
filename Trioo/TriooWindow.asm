@@ -59,9 +59,11 @@ hButtonSound dd ?
 hButtonReplay dd ?
 hButtonHome dd ?
 hButtonPlay dd ?
+hIcon dd ?
 hExtraPlank dd ?
 hExtraPlankFallDown dd ?
 hWhite dd ?
+
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -91,8 +93,11 @@ ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
+IconFilePath BYTE "pic\Icon.bmp", 0
+bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp"
 ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
 ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
+
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -102,6 +107,7 @@ bgImgPath	BYTE "pic\bgImg.bmp", 0
 bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
 bgImgHelpPath BYTE "pic\help.bmp", 0
 
+IDI_ICON1 equ 101
 
 PAUSE_POSITION0 equ 210
 PAUSE_STEP equ 150
@@ -159,6 +165,7 @@ hBitmap_bg dd ?
 hBitmap_btn_endless dd ?
 hBitmap_btn_help dd ?
 hBitmap_bg_dead dd ?
+hBitmap_bg_dead_congrat dd ?
 hBitmap_btn_replay dd ?
 hBitmap_help dd ?
 hBitmap_btn_home dd ?
@@ -173,7 +180,10 @@ InitInstance PROC
 	INVOKE GetModuleHandle, NULL
 	mov hInstance, eax
 	mov MainWin.hInstance, eax
-	INVOKE LoadIcon, NULL, IDI_APPLICATION
+
+	invoke	LoadIcon,hInstance,IDI_ICON1
+	;INVOKE LoadCursor, NULL, IDC_ARROW
+
 	mov MainWin.hIcon, eax
 	INVOKE LoadCursor, NULL, IDC_ARROW
 	mov MainWin.hCursor, eax
@@ -292,6 +302,8 @@ InitImage PROC
 	mov hBitmap_btn_endless, eax
 	INVOKE LoadImage, NULL, ADDR bgImgDeadPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg_dead, eax
+	INVOKE LoadImage, NULL, ADDR bgImgDeadCongratPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_bg_dead_congrat, eax
 	INVOKE LoadImage, NULL, ADDR btnReplayPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_btn_replay, eax
 	INVOKE LoadImage, NULL, ADDR bgImgHelpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
@@ -940,18 +952,18 @@ mouseUpDead PROC USES eax
 
 	mov al, btnReplay_pressed
 	.if al != 0
-		INVOKE jmpToLive
-		INVOKE InvalidateRect, NULL, NULL, FALSE
+		INVOKE jmpToLive		
 		mov al, 0
 		mov btnReplay_pressed, al
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 
 	mov al, btnHome_pressed
 	.if al != 0
-		INVOKE jmpToOpening
-		INVOKE InvalidateRect, NULL, NULL, FALSE
+		INVOKE jmpToOpening		
 		mov al, 0
 		mov btnHome_pressed, al
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 
 	ret
@@ -973,7 +985,14 @@ drawDeadScreen PROC USES eax,
 	score: DWORD,
 	bestScore:DWORD
 
-	invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
+	mov eax, game.score
+	.if eax == game.bestScore && eax != 0
+		invoke drawImg, hBitmap_bg_dead_congrat, 0, 0, SCREEN_X, SCREEN_Y
+		invoke playbest
+	.else
+		invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
+	.endif
+	
 	invoke drawDeadBtns
 
 	invoke SetBkMode, hDC, TRANSPARENT

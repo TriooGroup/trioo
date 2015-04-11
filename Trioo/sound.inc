@@ -7,7 +7,7 @@ include kernel32.inc
 INCLUDE winmm.inc
 
 .code
-FOR param ,<BGM_01, BGM_02, boom, crash, failure, hit, jump>
+FOR param ,<BGM_01, BGM_02, boom, crash, failure, hit, jump, best>
 	play&param PROTO
 ENDM
 
