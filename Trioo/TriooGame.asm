@@ -38,6 +38,9 @@ startGame PROC
 	mov game.nextBall, 10
 	mov game.ballNumber, 0
 	mov game.currentLevel, 0
+	mov game.extraPlankState, 0
+	mov game.extraPosition, 0
+	mov game.isExtraActivated, 0
 	call Randomize
 	mov ecx, MAX_NUM
 	mov edi, 0
@@ -65,6 +68,12 @@ L2:
 		sub game.activeCountdown, 1
 		.IF game.activeCountdown == 0
 			mov game.isActivated, 0
+		.ENDIF
+	.ENDIF
+	.IF game.extraActiveCountdown > 0
+		sub game.extraActiveCountdown, 1
+		.IF game.extraActiveCountdown == 0
+			mov game.isExtraActivated, 0
 		.ENDIF
 	.ENDIF
 	mov edi, 0
@@ -148,8 +157,11 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				ret
 			.ELSE
-				.IF ((edx == 1) && (game.ball[edi].velocityX > 0) || (edx == 3) && (game.ball[edi].velocityX < 0))
-					mov edx, game.ball[edi].speedType
+				.IF ((edx == 1) && (game.ball[edi].velocityX > 0)) || ((edx == 3) && (game.ball[edi].velocityX < 0))
+					mov ebx, game.ball[edi].speedType
+					mov eax, TYPE SpeedType
+					mul ebx
+					mov edx, eax
 					mov eax, speedTypes[edx].velocityYMax
 					mov game.ball[edi].velocityY, 0
 					sub game.ball[edi].velocityY, eax
@@ -158,13 +170,18 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				mov eax, PLANK_Y - DIMETER
 				mov game.ball[edi].positionY, eax
-				mov eax, game.ball[edi].color
-				mov game.isActivated, eax
-				mov game.activeCountdown, MAX_COUNTDOWN
 				add game.score, 1
 				mov eax, game.currentLevel
 				add eax, 1
 				mov ebx, levelUpScore[eax * 4]
+				.IF edx == game.extraPosition
+					mov game.isExtraActivated, 1
+					mov game.extraActiveCountdown, MAX_COUNTDOWN
+				.ELSE
+					mov eax, game.ball[edi].color
+					mov game.isActivated, eax
+					mov game.activeCountdown, MAX_COUNTDOWN
+				.ENDIF
 				.IF eax < 3 && ebx < game.score
 					mov game.currentLevel, eax
 					mov ebx, minIntervalArray[eax * 4]
@@ -194,7 +211,7 @@ stepExtraPlank PROC
 	.IF game.extraPlankState == 0
 		mov eax, 10000
 		call RandomRange
-		.IF eax < 100
+		.IF eax < 1000
 			mov eax, 3
 			call RandomRange
 			add eax, 1
@@ -211,13 +228,18 @@ stepExtraPlank PROC
 			add game.extraPlankVelocity, 1
 			mov eax, game.extraPlankVelocity
 			add game.extraPlankHeight, eax
-			.IF game.extraPlankHeight > PLANK_Y
+			mov eax, game.plankPosition
+			.IF game.extraPlankHeight > PLANK_Y && game.extraPosition == eax
 				mov game.extraPlankState, 2
 				mov game.extraPlankCountdown, EXTRA_PLANK_TIME
 			.ENDIF
 		.ENDIF
 	.ELSE
 		sub game.extraPlankCountdown, 1
+		.IF game.extraPlankCountdown == 0
+			mov game.extraPosition, 0
+			mov game.extraPlankState, 0
+		.ENDIF
 	.ENDIF
 	ret
 stepExtraPlank ENDP

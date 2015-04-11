@@ -15,6 +15,7 @@ DrawBackground PROTO
 DrawBalls PROTO
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
 DrawPlank PROTO
+DrawExtraPlank PROTO
 DrawHalo PROTO
 DrawCircle PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
 DrawCross PROTO, pos_x:DWORD, pos_y:DWORD, side_length:DWORD, handle:DWORD
@@ -32,6 +33,7 @@ mouseUpOpening PROTO
 mouseUpHelp PROTO
 mouseDownDead PROTO p:POINT
 mouseUpDead PROTO
+mouseDownPause PROTO p:POINT
 
 IntToStr PROTO, val:DWORD
 StringLen PROTO, pString: PTR BYTE

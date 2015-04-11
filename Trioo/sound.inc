@@ -10,3 +10,11 @@ INCLUDE winmm.inc
 FOR param ,<BGM_01, BGM_02, boom, crash, failure, hit, jump>
 	play&param PROTO
 ENDM
+
+closeMusic PROTO
+closeSound PROTO
+
+GameSound STRUCT
+	playMusic DWORD 1
+	playSound DWORD 1
+GameSound ENDS
