@@ -544,9 +544,11 @@ LOCAL positionX:DWORD
 			;countdown bar
 			invoke SelectObject, hMemDC, hBuffer
 			mov eax, game.extraPlankCountdown
+			sub eax, EXTRA_PLANK_ALERT_TIME
 			imul eax, 310
 			mov edx, 0
 			mov ecx, EXTRA_PLANK_TIME
+			sub ecx, EXTRA_PLANK_ALERT_TIME
 			div ecx
 			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCCOPY
 		.ENDIF
