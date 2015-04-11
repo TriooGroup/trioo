@@ -28,8 +28,10 @@ Game STRUCT
 	activeCountdown DWORD ?
 	gravity DWORD ?
 	minInterval DWORD ?
+	maxInterval DWORD ?
 	nextBall DWORD ?
 	ballNumber DWORD ?
+	currentLevel DWORD ?
 Game ENDS
 
 RED EQU 1
