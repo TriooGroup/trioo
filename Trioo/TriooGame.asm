@@ -6,6 +6,7 @@ INCLUDE TriooGame.inc
 PUBLIC game
 generateBall PROTO
 moveOneBall PROTO, index:DWORD
+stepExtraPlank PROTO
 
 SpeedType STRUCT
 	velocityX SDWORD ?
@@ -73,6 +74,7 @@ L3:
 	add edi, 1
 	loop L3
 	sub game.nextBall, 1
+	invoke stepExtraPlank
 	ret
 step ENDP
 
@@ -131,9 +133,14 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 		add game.ball[edi].positionY, eax
 		.IF game.ball[edi].positionY > PLANK_Y - DIMETER
 			mov ebx, game.ball[edi].positionX
-			.IF ((ebx > PLANK_X1 - RADIUS) && (ebx < PLANK_X2 - RADIUS) && (game.plankPosition != 1)) || \
-				((ebx > PLANK_X2 - RADIUS) && (ebx < PLANK_X3 - RADIUS) && (game.plankPosition != 2)) || \
-				((ebx > PLANK_X3 - RADIUS) && (game.plankPosition != 3))
+			.IF (ebx > PLANK_X1 - RADIUS) && (ebx < PLANK_X2 - RADIUS)
+				mov edx, 1
+			.ELSEIF	(ebx > PLANK_X2 - RADIUS) && (ebx < PLANK_X3 - RADIUS)
+				mov edx, 2
+			.ELSE
+				mov edx, 3
+			.ENDIF
+			.IF (edx != game.extraPosition) && (edx != game.plankPosition)
 				mov game.state, DEAD
 				mov eax, game.score
 				.IF eax > game.bestScore					
@@ -141,7 +148,8 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				ret
 			.ELSE
-				.IF ((ebx < PLANK_X2) && (game.ball[edi].velocityX > 0) || (ebx > PLANK_X3) && (game.ball[edi].velocityX < 0))
+				.IF ((edx == 1) && (game.ball[edi].velocityX > 0) || (edx == 3) && (game.ball[edi].velocityX < 0))
+					mov edx, game.ball[edi].speedType
 					mov eax, speedTypes[edx].velocityYMax
 					mov game.ball[edi].velocityY, 0
 					sub game.ball[edi].velocityY, eax
@@ -177,6 +185,40 @@ moveOneBall ENDP
 movePlank PROC USES eax, position: DWORD
 	mov eax, position
 	mov game.plankPosition, eax
+	mov game.isActivated, 0
+	mov game.activeCountdown, 0
 	ret
 movePlank ENDP
+
+stepExtraPlank PROC
+	.IF game.extraPlankState == 0
+		mov eax, 10000
+		call RandomRange
+		.IF eax < 100
+			mov eax, 3
+			call RandomRange
+			add eax, 1
+			mov game.extraPosition, eax
+			mov game.extraPlankHeight, 0
+			mov game.extraPlankVelocity, 0
+			mov game.extraPlankCountdown, 10
+			mov game.extraPlankState, 1
+		.ENDIF
+	.ELSEIF game.extraPlankState == 1
+		.IF game.extraPlankCountdown > 0
+			sub game.extraPlankCountdown, 1
+		.ELSE
+			add game.extraPlankVelocity, 1
+			mov eax, game.extraPlankVelocity
+			add game.extraPlankHeight, eax
+			.IF game.extraPlankHeight > PLANK_Y
+				mov game.extraPlankState, 2
+				mov game.extraPlankCountdown, EXTRA_PLANK_TIME
+			.ENDIF
+		.ENDIF
+	.ELSE
+		sub game.extraPlankCountdown, 1
+	.ENDIF
+	ret
+stepExtraPlank ENDP
 END

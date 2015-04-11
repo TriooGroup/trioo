@@ -33,6 +33,7 @@ Game STRUCT
 	ballNumber DWORD ?
 	extraPlankState DWORD ? ;0表示没有，1表示在下落，2表示有效期间
 	extraPlankHeight DWORD ?
+	extraPlankVelocity DWORD ?
 	extraPosition DWORD ? ;1/2/3表示位置
 	extraPlankCountdown DWORD ? 
 	currentLevel DWORD ?
