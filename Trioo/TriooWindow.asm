@@ -94,7 +94,7 @@ ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
 IconFilePath BYTE "pic\Icon.bmp", 0
-bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp"
+bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp", 0
 ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
 ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
 
@@ -992,7 +992,7 @@ drawDeadScreen PROC USES eax,
 	.else
 		invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
 	.endif
-	
+
 	invoke drawDeadBtns
 
 	invoke SetBkMode, hDC, TRANSPARENT
