@@ -61,7 +61,7 @@ hButtonHome dd ?
 hButtonPlay dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
-BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
+BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
 NormalPlankFilePath BYTE "pic\trio_key_white.bmp", 0
 YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
 RedDotFilePath BYTE "pic\red_dot_combine.bmp", 0
@@ -92,6 +92,7 @@ ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
+scoreStr BYTE "Score", 0
 
 bgImgPath	BYTE "pic\bgImg.bmp", 0
 bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
@@ -604,7 +605,9 @@ LOCAL textColor:DWORD
 	invoke IntToStr, game.score
 	invoke SetTextColor, hDC, 0ffffffh
 	invoke StringLen, ADDR strBuffer
-	invoke TextOut, hDC, 20, 20, ADDR strBuffer, eax
+	invoke TextOut, hDC, 590, 20, ADDR strBuffer, eax
+	invoke StringLen, ADDR scoreStr
+	invoke TextOut, hDC, 500, 20, ADDR scoreStr, eax
 	ret
 DrawScore ENDP
 
