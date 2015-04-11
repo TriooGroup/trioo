@@ -59,6 +59,8 @@ hButtonSound dd ?
 hButtonReplay dd ?
 hButtonHome dd ?
 hButtonPlay dd ?
+hExtraPlank dd ?
+hExtraPlankFallDown dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -88,7 +90,8 @@ ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
-
+ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
+ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -265,6 +268,10 @@ InitImage PROC
 	mov hButtonHome, eax
 	invoke LoadImage, NULL, ADDR ButtonPlayFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hButtonPlay, eax
+	invoke LoadImage, NULL, ADDR ExtraPlankFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hExtraPlank, eax
+	invoke LoadImage, NULL, ADDR ExtraPlankFallDownFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hExtraPlankFallDown, eax
 
 	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg, eax
@@ -398,6 +405,7 @@ jmpToLive ENDP
 DrawPlayingScreen PROC
 	invoke DrawBackground
 	invoke DrawHalo
+	invoke DrawExtraPlank
 	invoke DrawBalls
 	invoke DrawPlank
 	invoke DrawScore
@@ -467,6 +475,57 @@ LOCAL tempHandle:DWORD
 
 	ret
 DrawPlank ENDP
+
+DrawExtraPlank PROC
+LOCAL positionX:DWORD
+	.IF game.extraPlankState == 0;no extra plank
+		ret
+	.ELSEIF game.extraPlankState == 1;falling down
+		.IF game.plankPosition == 1
+			mov positionX, PLANK_X1
+		.ELSEIF game.plankPosition == 2
+			mov positionX, PLANK_X2
+		.ELSE
+			mov positionX, PLANK_X3
+		.ENDIF
+
+		invoke SelectObject, hMemDC, hExtraPlankFallDown
+		invoke BitBlt, hDC, positionX, game.extraPlankHeight, 320, 16, hMemDC, 0, 0, SRCPAINT
+	.ELSEIF game.extraPlankState == 2 ;valid
+		.IF game.plankPosition == 1
+			mov positionX, PLANK_X1
+		.ELSEIF game.plankPosition == 2
+			mov positionX, PLANK_X2
+		.ELSE
+			mov positionX, PLANK_X3
+		.ENDIF
+
+		.IF game.extraPlankCountdown < EXTRA_PLANK_ALERT_TIME ;blink
+			mov eax, 0
+			mov edx, 0
+			mov eax, game.extraPlankCountdown
+			mov ecx, 50
+			div ecx
+			.IF edx < 25 ;show
+				invoke SelectObject, hMemDC, hExtraPlank
+				invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
+			.ENDIF
+		.ELSE ;countdown
+			invoke SelectObject, hMemDC, hExtraPlank
+			invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
+
+			;countdown bar
+			invoke SelectObject, hMemDC, hBuffer
+			mov eax, game.extraPlankCountdown
+			imul eax, 310
+			mov edx, 0
+			mov ecx, EXTRA_PLANK_TIME
+			div ecx
+			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCCOPY
+		.ENDIF
+	.ENDIF
+	ret
+DrawExtraPlank ENDP
 
 DrawHalo PROC USES eax ebx edx
 LOCAL positionX:DWORD
