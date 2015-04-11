@@ -230,9 +230,14 @@ stepExtraPlank PROC
 			mov eax, game.extraPlankVelocity
 			add game.extraPlankHeight, eax
 			mov eax, game.plankPosition
-			.IF game.extraPlankHeight > PLANK_Y && game.extraPosition == eax
-				mov game.extraPlankState, 2
-				mov game.extraPlankCountdown, EXTRA_PLANK_TIME
+			.IF game.extraPlankHeight > PLANK_Y
+				.IF eax == game.extraPosition
+					mov game.extraPlankState, 2
+					mov game.extraPlankCountdown, EXTRA_PLANK_TIME
+				.ELSE
+					mov game.extraPlankState, 0
+					mov game.extraPosition, 0
+				.ENDIF
 			.ENDIF
 		.ENDIF
 	.ELSE
