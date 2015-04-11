@@ -16,10 +16,12 @@ SpeedType ENDS
 .data	
 	diameter EQU 47
 	game Game <>
-	vXArray SDWORD 5 DUP(6), 8, 10, 12, 14
-	vYArray SDWORD 5 DUP(-6), -4, 3, 8, 13
+	minIntervalArray DWORD 50, 15, 10
+	maxIntervalArray DWORD 100, 50, 15
+	levelUpScore DWORD 0, 20, 30
+	LEVEL_NUM = 3
 	PARA_NUM = 2
-	speedTypes SpeedType {6, -3, 30, 1}, {7, 2, 26, 1}
+	speedTypes SpeedType {7, 0, 27, 1}, {6, -5, 31, 1}
 .code
 startGame PROC
 	mov game.plankPosition, 1
@@ -30,8 +32,11 @@ startGame PROC
 	mov game.activeCountdown, 0
 	mov game.minInterval, 7
 	mov game.gravity, 1
-	mov game.nextBall, 1
+	mov game.minInterval, 50
+	mov game.maxInterval, 100
+	mov game.nextBall, 10
 	mov game.ballNumber, 0
+	mov game.currentLevel, 0
 	call Randomize
 	mov ecx, MAX_NUM
 	mov edi, 0
@@ -46,17 +51,13 @@ step PROC USES edi
 		ret
 	.ENDIF
 	mov eax, game.minInterval
-	.IF game.nextBall == eax
-		mov game.nextBall, 0
-		.IF game.ballNumber == 0
-			invoke generateBall
-			jg L2
-		.ENDIF
-		mov eax, 1000
-		call RandomRange
-		cmp eax, 100
-		jg L2
+	.IF game.nextBall == 0
 		invoke generateBall
+		mov eax, game.maxInterval
+		sub eax, game.minInterval
+		call RandomRange
+		add eax, game.minInterval
+		mov game.nextBall, eax
 	.ENDIF
 L2:
 	.IF game.activeCountdown > 0
@@ -71,7 +72,7 @@ L3:
 	invoke moveOneBall, edi
 	add edi, 1
 	loop L3
-	add game.nextBall, 1
+	sub game.nextBall, 1
 	ret
 step ENDP
 
@@ -153,6 +154,16 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				mov game.isActivated, eax
 				mov game.activeCountdown, MAX_COUNTDOWN
 				add game.score, 1
+				mov eax, game.currentLevel
+				add eax, 1
+				mov ebx, levelUpScore[eax * 4]
+				.IF eax < 3 && ebx < game.score
+					mov game.currentLevel, eax
+					mov ebx, minIntervalArray[eax * 4]
+					mov game.minInterval, ebx
+					mov ebx, maxIntervalArray[eax * 4]
+					mov game.maxInterval, ebx
+				.ENDIF
 			.ENDIF
 		.ENDIF
 		.IF (game.ball[edi].positionX > SCREEN_X) || (game.ball[edi].positionX < 0 - DIMETER)
