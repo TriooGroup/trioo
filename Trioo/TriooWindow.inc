@@ -33,6 +33,7 @@ mouseUpOpening PROTO
 mouseUpHelp PROTO
 mouseDownDead PROTO p:POINT
 mouseUpDead PROTO
+mouseDownPause PROTO p:POINT
 
 IntToStr PROTO, val:DWORD
 StringLen PROTO, pString: PTR BYTE
