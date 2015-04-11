@@ -88,8 +88,6 @@ ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
-PAUSE_POSITION0 equ 210
-PAUSE_STEP equ 150
 
 
 strBuffer BYTE 20 DUP (0)
@@ -99,6 +97,9 @@ bgImgPath	BYTE "pic\bgImg.bmp", 0
 bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
 bgImgHelpPath BYTE "pic\help.bmp", 0
 
+
+PAUSE_POSITION0 equ 210
+PAUSE_STEP equ 150
 
 btnEndlessPath BYTE "pic\btnEndless.bmp", 0
 btnEndless_X equ 600
