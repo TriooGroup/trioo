@@ -21,6 +21,7 @@ msg MSG <>
 .code
 WinMain PROC
 	INVOKE InitInstance
+	
 
 Message_Loop:
 	INVOKE GetMessage, ADDR msg, NULL, NULL, NULL

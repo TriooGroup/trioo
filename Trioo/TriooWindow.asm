@@ -59,6 +59,7 @@ hButtonSound dd ?
 hButtonReplay dd ?
 hButtonHome dd ?
 hButtonPlay dd ?
+hIcon dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -88,6 +89,7 @@ ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
 ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
+IconFilePath BYTE "pic\Icon.bmp", 0
 
 
 strBuffer BYTE 20 DUP (0)
@@ -98,6 +100,7 @@ bgImgPath	BYTE "pic\bgImg.bmp", 0
 bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
 bgImgHelpPath BYTE "pic\help.bmp", 0
 
+IDI_ICON1 equ 101
 
 PAUSE_POSITION0 equ 210
 PAUSE_STEP equ 150
@@ -169,7 +172,10 @@ InitInstance PROC
 	INVOKE GetModuleHandle, NULL
 	mov hInstance, eax
 	mov MainWin.hInstance, eax
-	INVOKE LoadIcon, NULL, IDI_APPLICATION
+
+	invoke	LoadIcon,hInstance,IDI_ICON1
+	;INVOKE LoadCursor, NULL, IDC_ARROW
+
 	mov MainWin.hIcon, eax
 	INVOKE LoadCursor, NULL, IDC_ARROW
 	mov MainWin.hCursor, eax
@@ -869,18 +875,18 @@ mouseUpDead PROC USES eax
 
 	mov al, btnReplay_pressed
 	.if al != 0
-		INVOKE jmpToLive
-		INVOKE InvalidateRect, NULL, NULL, FALSE
+		INVOKE jmpToLive		
 		mov al, 0
 		mov btnReplay_pressed, al
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 
 	mov al, btnHome_pressed
 	.if al != 0
-		INVOKE jmpToOpening
-		INVOKE InvalidateRect, NULL, NULL, FALSE
+		INVOKE jmpToOpening		
 		mov al, 0
 		mov btnHome_pressed, al
+		INVOKE InvalidateRect, NULL, NULL, FALSE
 	.endif
 
 	ret
