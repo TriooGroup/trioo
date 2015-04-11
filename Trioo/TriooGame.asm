@@ -212,7 +212,7 @@ stepExtraPlank PROC
 	.IF game.extraPlankState == 0
 		mov eax, 10000
 		call RandomRange
-		.IF eax < 1000
+		.IF eax < 10
 			mov eax, 3
 			call RandomRange
 			add eax, 1

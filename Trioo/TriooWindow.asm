@@ -61,6 +61,7 @@ hButtonHome dd ?
 hButtonPlay dd ?
 hExtraPlank dd ?
 hExtraPlankFallDown dd ?
+hWhite dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -224,6 +225,8 @@ InitInstance ENDP
 InitImage PROC
 	invoke LoadImage, NULL, ADDR BufferFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBuffer, eax
+	invoke LoadImage, NULL, ADDR BufferFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hWhite, eax
 	invoke LoadImage, NULL, ADDR BackgroundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBackground, eax
 	invoke LoadImage, NULL, ADDR YellowDotFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
@@ -504,7 +507,7 @@ LOCAL tempHandle:DWORD
 	ret
 DrawPlank ENDP
 
-DrawExtraPlank PROC
+DrawExtraPlank PROC USES eax ebx ecx edx
 LOCAL positionX:DWORD
 	.IF game.extraPlankState == 0;no extra plank
 		ret
@@ -543,7 +546,6 @@ LOCAL positionX:DWORD
 			invoke BitBlt, hDC, positionX, PLANK_Y, 320, 16, hMemDC, 0, 0, SRCPAINT
 
 			;countdown bar
-			invoke SelectObject, hMemDC, hBuffer
 			mov eax, game.extraPlankCountdown
 			sub eax, EXTRA_PLANK_ALERT_TIME
 			imul eax, 310
@@ -551,7 +553,14 @@ LOCAL positionX:DWORD
 			mov ecx, EXTRA_PLANK_TIME
 			sub ecx, EXTRA_PLANK_ALERT_TIME
 			div ecx
-			invoke BitBlt, hDC, positionX + 5, PLANK_Y + 5, eax, 6, hMemDC, 0, 0, SRCPAINT
+			push eax
+			invoke SelectObject, hMemDC, hWhite
+			pop eax
+			mov ebx, positionX
+			add ebx, 5
+			mov edx, PLANK_Y
+			add edx, 5
+			invoke BitBlt, hDC, ebx, edx, eax, 6, hMemDC, 0, 0, SRCCOPY
 		.ENDIF
 	.ENDIF
 	ret
