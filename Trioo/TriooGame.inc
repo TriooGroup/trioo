@@ -28,8 +28,14 @@ Game STRUCT
 	activeCountdown DWORD ?
 	gravity DWORD ?
 	minInterval DWORD ?
+	maxInterval DWORD ?
 	nextBall DWORD ?
 	ballNumber DWORD ?
+	extraPlankState DWORD ? ;0表示没有，1表示在下落，2表示有效期间
+	extraPlankHeight DWORD ?
+	extraPosition DWORD ? ;1/2/3表示位置
+	extraPlankCountdown DWORD ? 
+	currentLevel DWORD ?
 Game ENDS
 
 RED EQU 1
@@ -49,6 +55,7 @@ DIMETER = 47
 RADIUS = 24
 FLOATING_DISTANCE = 3
 MAX_COUNTDOWN = 4
+EXTRA_PLANK_TIME = 150
 startGame PROTO
 step PROTO 
 movePlank PROTO, position: DWORD
