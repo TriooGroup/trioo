@@ -208,7 +208,7 @@ movePlank PROC USES eax, position: DWORD
 	ret
 movePlank ENDP
 
-stepExtraPlank PROC
+stepExtraPlank PROC USES eax ebx
 	.IF game.extraPlankState == 0
 		mov eax, 10000
 		call RandomRange
@@ -234,6 +234,19 @@ stepExtraPlank PROC
 				.IF eax == game.extraPosition
 					mov game.extraPlankState, 2
 					mov game.extraPlankCountdown, EXTRA_PLANK_TIME
+					mov ebx, eax
+					mov eax, 2
+					call RandomRange
+					shl eax, 1
+					sub eax, 1
+					add ebx, eax
+					.IF ebx == 0
+						mov ebx, 3
+					.ENDIF
+					.IF ebx == 4
+						mov ebx, 0
+					.ENDIF
+					mov game.extraPosition, ebx
 				.ELSE
 					mov game.extraPlankState, 0
 					mov game.extraPosition, 0
