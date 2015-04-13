@@ -14,6 +14,8 @@ DrawPauseScreen PROTO
 DrawBackground PROTO
 DrawBalls PROTO, is_final_state:DWORD, dead_index:DWORD
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
+DrawHeart PROTO, pos_x:DWORD, pos_y:DWORD
+DrawLives PROTO, lives:DWORD
 DrawPlank PROTO
 DrawExtraPlank PROTO
 DrawHalo PROTO, plankPosition:DWORD, activeCountdown:DWORD

@@ -64,9 +64,10 @@ hExtraPlank dd ?
 hExtraPlankFallDown dd ?
 hWhite dd ?
 hBlackPlank dd ?
+hHeart dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
-BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
+BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
 NormalPlankFilePath BYTE "pic\trio_key_white.bmp", 0
 YellowDotFilePath BYTE "pic\yellow_dot_combine.bmp", 0
 RedDotFilePath BYTE "pic\red_dot_combine.bmp", 0
@@ -98,10 +99,12 @@ bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp", 0
 bgImgDeadCongratLightPath BYTE "pic\bgImgDeadCongratLight.bmp", 0
 ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
 ExtraPlankFallDownFilePath BYTE "pic\plank_fall_down.bmp", 0
+HeartFilePath BYTE "pic\heart_combine.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
 scoreStr BYTE "Score", 0
+spaceStr BYTE "(space)", 0
 
 bgImgPath	BYTE "pic\bgImg.bmp", 0
 bgImgDeadPath BYTE "pic\bgImgDead.bmp", 0
@@ -299,6 +302,8 @@ InitImage PROC
 	mov hExtraPlank, eax
 	invoke LoadImage, NULL, ADDR ExtraPlankFallDownFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hExtraPlankFallDown, eax
+	invoke LoadImage, NULL, ADDR HeartFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hHeart, eax
 
 	INVOKE LoadImage, NULL, ADDR bgImgPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg, eax
@@ -454,6 +459,7 @@ DrawPlayingScreen PROC
 	invoke DrawBalls, 0, -1
 	invoke DrawPlank
 	invoke DrawScore
+	invoke DrawLives, game.lives
 	ret
 DrawPlayingScreen ENDP
 
@@ -493,6 +499,7 @@ DrawFinalScreen PROC,dead_index:DWORD
 	invoke DrawBalls, 1, dead_index
 	invoke DrawPlank
 	invoke DrawScore
+	invoke DrawLives, game.lives
 	ret
 DrawFinalScreen ENDP
 
@@ -502,6 +509,30 @@ DrawBackground PROC
 			hMemDC, 0, 0, SRCCOPY
 	ret
 DrawBackground ENDP
+
+DrawHeart PROC, pos_x:DWORD, pos_y:DWORD
+	invoke SelectObject, hMemDC, hHeart
+	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 54, 0, SRCAND
+	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 0, 0, SRCPAINT
+	ret
+DrawHeart ENDP
+
+DrawLives PROC, lives:DWORD
+	invoke DrawHeart, 20, 20
+	invoke SetBkMode, hDC, TRANSPARENT 
+
+	invoke CreateFont,35,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFont, eax
+	invoke SelectObject, hDC, hFont
+
+	invoke IntToStr, game.lives
+	invoke SetTextColor, hDC, 0ffffffh
+	invoke StringLen, ADDR strBuffer
+	invoke TextOut, hDC, 80, 20, ADDR strBuffer, eax
+
+	ret
+DrawLives ENDP
 
 DrawPlank PROC
 LOCAL positionX:DWORD
@@ -741,6 +772,18 @@ LOCAL textColor:DWORD
 	invoke TextOut, hDC, 590, 20, ADDR strBuffer, eax
 	invoke StringLen, ADDR scoreStr
 	invoke TextOut, hDC, 500, 20, ADDR scoreStr, eax
+
+	invoke SetBkMode, hDC, TRANSPARENT 
+
+	space_Height = 20
+	invoke CreateFont,space_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFont, eax
+	invoke SelectObject, hDC, hFont
+
+	invoke StringLen, ADDR spaceStr
+	invoke TextOut, hDC, 1030, 63, ADDR spaceStr, eax
+
 	ret
 DrawScore ENDP
 

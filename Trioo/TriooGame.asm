@@ -41,6 +41,7 @@ startGame PROC
 	mov game.extraPlankState, 0
 	mov game.extraPosition, 0
 	mov game.isExtraActivated, 0
+	mov game.lives, 1
 	call Randomize
 	mov ecx, MAX_NUM
 	mov edi, 0

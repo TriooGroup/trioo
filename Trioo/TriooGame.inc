@@ -40,6 +40,7 @@ Game STRUCT
 	extraPlankCountdown DWORD ? 
 	currentLevel DWORD ?
 	deadCountdown DWORD ?
+	lives DWORD ?
 Game ENDS
 
 RED EQU 1
