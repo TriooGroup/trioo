@@ -25,6 +25,8 @@ KeyDownProc PROTO, localMsg: DWORD, wParam: DWORD, lParam: DWORD
 jmpToOpening PROTO
 jmpToLive PROTO
 
+stepDead PROTO
+
 drawOpeningScreen PROTO
 drawDeadScreen PROTO score:DWORD, bestScore:DWORD
 drawHelpScreen PROTO

@@ -95,6 +95,7 @@ ButtonHomeFilePath BYTE "pic\trio_button_home.bmp", 0
 ButtonPlayFilePath BYTE "pic\trio_button_play.bmp", 0
 IconFilePath BYTE "pic\Icon.bmp", 0
 bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp", 0
+bgImgDeadCongratLightPath BYTE "pic\bgImgDeadCongratLight.bmp", 0
 ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
 ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
 
@@ -161,11 +162,15 @@ best_Height equ 50
 bestScore_X equ 650
 bestScore_Y equ 350
 
+deadScreenCounter DWORD 0
+deadBgNum DWORD 0
+
 hBitmap_bg dd ?
 hBitmap_btn_endless dd ?
 hBitmap_btn_help dd ?
 hBitmap_bg_dead dd ?
 hBitmap_bg_dead_congrat dd ?
+hBitmap_bg_dead_congrat_light dd ?
 hBitmap_btn_replay dd ?
 hBitmap_help dd ?
 hBitmap_btn_home dd ?
@@ -304,6 +309,8 @@ InitImage PROC
 	mov hBitmap_bg_dead, eax
 	INVOKE LoadImage, NULL, ADDR bgImgDeadCongratPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_bg_dead_congrat, eax
+	INVOKE LoadImage, NULL, ADDR bgImgDeadCongratLightPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hBitmap_bg_dead_congrat_light, eax
 	INVOKE LoadImage, NULL, ADDR btnReplayPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_btn_replay, eax
 	INVOKE LoadImage, NULL, ADDR bgImgHelpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
@@ -325,13 +332,20 @@ SAVE:
 		invoke jmpToOpening
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_TIMER
-		.IF game.state == LIVE
+		.IF game.state == DEAD
+			invoke stepDead
+			invoke InvalidateRect, hWnd, NULL, FALSE
+		.ELSEIF game.state == LIVE
 			invoke step
 			.IF game.state == DEAD
 				invoke playcrash
 				invoke closeMusic
+				mov eax, game.score
+				.IF eax == game.bestScore && eax != 0
+					invoke playbest
+				.ENDIF
 			.ENDIF 
-			invoke InvalidateRect, hWnd, NULL, FALSE
+			invoke InvalidateRect, hWnd, NULL, FALSE		
 		.ENDIF
 		jmp WndProcExit
 	.ELSEIF localMsg == WM_PAINT
@@ -987,8 +1001,14 @@ drawDeadScreen PROC USES eax,
 
 	mov eax, game.score
 	.if eax == game.bestScore && eax != 0
-		invoke drawImg, hBitmap_bg_dead_congrat, 0, 0, SCREEN_X, SCREEN_Y
-		invoke playbest
+		mov eax, deadBgNum
+		.if eax == 0
+			invoke drawImg, hBitmap_bg_dead_congrat, 0, 0, SCREEN_X, SCREEN_Y
+		.else
+			invoke drawImg, hBitmap_bg_dead_congrat_light, 0, 0, SCREEN_X, SCREEN_Y
+		.endif
+		
+		
 	.else
 		invoke drawImg, hBitmap_bg_dead, 0, 0, SCREEN_X, SCREEN_Y
 	.endif
@@ -1021,6 +1041,20 @@ drawDeadScreen PROC USES eax,
 
 	ret
 drawDeadScreen ENDP
+
+stepDead PROC USES eax
+	inc deadScreenCounter
+	.IF deadScreenCounter == 1
+		mov eax, 1
+		mov deadBgNum, eax
+	.ELSEIF deadScreenCounter == 3
+		mov eax, 0
+		mov deadBgNum, eax
+		mov deadScreenCounter, eax
+	.ELSE
+	.ENDIF
+	ret
+stepDead ENDP
 
 IntToStr PROC USES eax ebx ecx edx,
 	val:DWORD
