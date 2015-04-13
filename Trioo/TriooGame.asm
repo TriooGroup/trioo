@@ -41,6 +41,8 @@ startGame PROC
 	mov game.extraPlankState, 0
 	mov game.extraPosition, 0
 	mov game.isExtraActivated, 0
+	mov game.deadIndex, -1
+	mov game.deadCountdown, 0
 	mov game.lives, 1
 	call Randomize
 	mov ecx, MAX_NUM
@@ -53,6 +55,13 @@ startGame ENDP
 
 step PROC USES edi
 	.IF game.state != LIVE
+		ret
+	.ENDIF
+	.IF game.deadIndex >= 0
+		sub game.deadCountdown, 1
+		.IF game.deadCountdown == 0
+			mov game.state, DEAD
+		.ENDIF
 		ret
 	.ENDIF
 	mov eax, game.minInterval
@@ -150,8 +159,11 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 			.ELSE
 				mov edx, 3
 			.ENDIF
-			.IF (edx != game.extraPosition) && (edx != game.plankPosition)
-				mov game.state, DEAD
+			.IF (edx != game.extraPosition) && (edx != game.plankPosition) ;DEAD
+				;mov game.state, DEAD
+				mov game.deadIndex, edi
+				mov game.deadCountdown, 44
+				mov game.ball[edi].positionY, PLANK_Y - RADIUS
 				mov eax, game.score
 				.IF eax > game.bestScore					
 					mov game.bestScore, eax

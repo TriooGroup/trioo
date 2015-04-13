@@ -456,7 +456,7 @@ DrawPlayingScreen PROC
 	invoke DrawHalo, game.plankPosition, game.activeCountdown
 	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
 	invoke DrawExtraPlank
-	invoke DrawBalls, 0, -1
+	invoke DrawBalls, game.deadIndex
 	invoke DrawPlank
 	invoke DrawScore
 	invoke DrawLives, game.lives
@@ -496,7 +496,7 @@ DrawFinalScreen PROC,dead_index:DWORD
 	invoke DrawHalo, game.plankPosition, game.activeCountdown
 	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
 	invoke DrawExtraPlank
-	invoke DrawBalls, 1, dead_index
+	invoke DrawBalls, game.deadIndex
 	invoke DrawPlank
 	invoke DrawScore
 	invoke DrawLives, game.lives
@@ -787,7 +787,7 @@ LOCAL textColor:DWORD
 	ret
 DrawScore ENDP
 
-DrawBalls PROC USES edx esi ecx, is_final_state:DWORD, dead_index:DWORD
+DrawBalls PROC USES edx esi ecx, dead_index:SDWORD
 	mov edx, TYPE Ball
 	mov esi, 0
 	mov ecx, MAX_NUM
@@ -796,11 +796,11 @@ L1:
 	push edx
 	push esi
 	push ecx
-	.IF is_final_state == 0
-		.IF game.ball[esi].existed == 1
-			invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
-		.ENDIF
-	.ELSE ;final screen
+;	.IF is_final_state == 0
+;		.IF game.ball[esi].existed == 1
+;			invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+;		.ENDIF
+;	.ELSE ;final screen
 		.IF game.ball[esi].existed == 1
 			.IF esi != dead_index
 				invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
@@ -815,7 +815,7 @@ L1:
 				.ENDIF
 			.ENDIF
 		.ENDIF
-	.ENDIF
+;	.ENDIF
 	pop ecx
 	pop esi
 	pop edx

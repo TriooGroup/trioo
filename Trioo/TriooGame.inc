@@ -40,6 +40,7 @@ Game STRUCT
 	extraPlankCountdown DWORD ? 
 	currentLevel DWORD ?
 	deadCountdown DWORD ?
+	deadIndex SDWORD ?
 	lives DWORD ?
 Game ENDS
 

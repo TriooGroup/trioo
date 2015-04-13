@@ -12,7 +12,7 @@ InitData PROTO
 DrawPlayingScreen PROTO
 DrawPauseScreen PROTO
 DrawBackground PROTO
-DrawBalls PROTO, is_final_state:DWORD, dead_index:DWORD
+DrawBalls PROTO, dead_index:SDWORD
 DrawOneBall PROTO, pos_x:DWORD, pos_y:DWORD, color:DWORD
 DrawHeart PROTO, pos_x:DWORD, pos_y:DWORD
 DrawLives PROTO, lives:DWORD
