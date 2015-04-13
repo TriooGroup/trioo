@@ -39,6 +39,7 @@ Game STRUCT
 	extraPosition DWORD ? ;1/2/3±Ì æŒª÷√
 	extraPlankCountdown DWORD ? 
 	currentLevel DWORD ?
+	deadCountdown DWORD ?
 Game ENDS
 
 RED EQU 1
@@ -60,6 +61,7 @@ FLOATING_DISTANCE = 3
 MAX_COUNTDOWN = 4
 EXTRA_PLANK_TIME = 200
 EXTRA_PLANK_ALERT_TIME = 50
+DEAD_ALERT_TIME = 50
 startGame PROTO
 step PROTO 
 movePlank PROTO, position: DWORD

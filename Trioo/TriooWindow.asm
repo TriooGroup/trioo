@@ -63,7 +63,7 @@ hIcon dd ?
 hExtraPlank dd ?
 hExtraPlankFallDown dd ?
 hWhite dd ?
-
+hBlackPlank dd ?
 
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg.bmp", 0
@@ -97,8 +97,7 @@ IconFilePath BYTE "pic\Icon.bmp", 0
 bgImgDeadCongratPath BYTE "pic\bgImgDeadCongrat.bmp", 0
 bgImgDeadCongratLightPath BYTE "pic\bgImgDeadCongratLight.bmp", 0
 ExtraPlankFilePath BYTE "pic\plank_extra.bmp", 0
-ExtraPlankFallDownFilePath BYTE "pic\plank_extra_fall_down.bmp", 0
-
+ExtraPlankFallDownFilePath BYTE "pic\plank_fall_down.bmp", 0
 
 strBuffer BYTE 20 DUP (0)
 fontStr BYTE "Lucida Sans Unicode", 0
@@ -324,7 +323,6 @@ InitImage PROC
 InitImage ENDP
 
 
-
 WndProc PROC, lhwnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
 LOCAL	ps:PAINTSTRUCT, pt:POINT	
 SAVE:
@@ -453,7 +451,7 @@ DrawPlayingScreen PROC
 	invoke DrawHalo, game.plankPosition, game.activeCountdown
 	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
 	invoke DrawExtraPlank
-	invoke DrawBalls
+	invoke DrawBalls, 0, -1
 	invoke DrawPlank
 	invoke DrawScore
 	ret
@@ -486,6 +484,17 @@ DrawPauseScreen PROC
 	invoke BitBlt, hDC, PAUSE_POSITION0+PAUSE_STEP*4, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
 	ret
 DrawPauseScreen ENDP
+
+DrawFinalScreen PROC,dead_index:DWORD
+	invoke DrawBackground
+	invoke DrawHalo, game.plankPosition, game.activeCountdown
+	invoke DrawHalo, game.extraPosition, game.extraActiveCountdown
+	invoke DrawExtraPlank
+	invoke DrawBalls, 1, dead_index
+	invoke DrawPlank
+	invoke DrawScore
+	ret
+DrawFinalScreen ENDP
 
 DrawBackground PROC
 	invoke SelectObject, hMemDC, hBackground
@@ -735,7 +744,7 @@ LOCAL textColor:DWORD
 	ret
 DrawScore ENDP
 
-DrawBalls PROC
+DrawBalls PROC USES edx esi ecx, is_final_state:DWORD, dead_index:DWORD
 	mov edx, TYPE Ball
 	mov esi, 0
 	mov ecx, MAX_NUM
@@ -744,14 +753,33 @@ L1:
 	push edx
 	push esi
 	push ecx
-	.IF game.ball[esi].existed == 1
-		invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+	.IF is_final_state == 0
+		.IF game.ball[esi].existed == 1
+			invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+		.ENDIF
+	.ELSE ;final screen
+		.IF game.ball[esi].existed == 1
+			.IF esi != dead_index
+				invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+			.ELSE
+				mov eax, 0
+				mov edx, 0
+				mov eax, game.deadCountdown
+				mov ecx, 10
+				div ecx
+				.IF edx < 5 ;show
+					invoke DrawOneBall, game.ball[esi].positionX, game.ball[esi].positionY, game.ball[esi].color
+				.ENDIF
+			.ENDIF
+		.ENDIF
 	.ENDIF
 	pop ecx
 	pop esi
 	pop edx
 	add esi, edx
-	loop L1
+	dec ecx
+	cmp ecx, 0
+	jg L1
 
 	ret
 DrawBalls ENDP
