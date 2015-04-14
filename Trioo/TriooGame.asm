@@ -150,7 +150,7 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 		add game.ball[edi].positionX, eax
 		mov eax, game.ball[edi].velocityY
 		add game.ball[edi].positionY, eax
-		.IF game.ball[edi].positionY > PLANK_Y - DIMETER
+		.IF game.ball[edi].positionY > PLANK_Y - DIMETER - 20
 			mov ebx, game.ball[edi].positionX
 			.IF (ebx > PLANK_X1 - RADIUS) && (ebx < PLANK_X2 - RADIUS)
 				mov edx, 1
@@ -159,7 +159,11 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 			.ELSE
 				mov edx, 3
 			.ENDIF
-			.IF (edx != game.extraPosition || game.extraPlankState != 2) && (edx != game.plankPosition) ;DEAD
+			.IF (edx != game.extraPosition || game.extraPlankState != 2) && (edx != game.plankPosition)
+				.IF game.ball[edi].positionY < PLANK_Y + 8 - DIMETER
+					ret
+				.ENDIF
+				;ËÀÍö
 				;mov game.state, DEAD
 				mov game.deadIndex, edi
 				mov game.deadCountdown, 44
@@ -170,6 +174,7 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				ret
 			.ELSE
+				;·´µ¯Çò
 				.IF edx == game.extraPosition
 					mov game.isExtraActivated, 1
 					mov game.extraActiveCountdown, MAX_COUNTDOWN
@@ -214,6 +219,9 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 moveOneBall ENDP
 
 movePlank PROC USES eax, position: DWORD
+	.IF game.state != LIVE || game.deadIndex != -1 
+		ret
+	.ENDIF
 	mov eax, position
 	mov game.plankPosition, eax
 	mov game.isActivated, 0
@@ -230,7 +238,7 @@ stepExtraPlank PROC USES eax ebx
 			call RandomRange
 			add eax, 1
 			mov game.extraPosition, eax
-			mov game.extraPlankHeight, 0
+			mov game.extraPlankHeight, 100
 			mov game.extraPlankVelocity, 0
 			mov game.extraPlankCountdown, 10
 			mov game.extraPlankState, 1
