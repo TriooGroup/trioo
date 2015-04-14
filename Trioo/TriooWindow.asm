@@ -948,7 +948,7 @@ mouseDownPause PROC USES eax,
 
 	.if p.x >= btnPauseReplay_X && p.x <= btnPauseReplay_X + btnPause_Width &&\
 		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
-		mov game.state, LIVE
+		invoke jmpToLive
 	.endif
 
 	.if p.x >= btnPauseHome_X && p.x <= btnPauseHome_X + btnPause_Width &&\
@@ -960,7 +960,8 @@ mouseDownPause PROC USES eax,
 	.if p.x >= btnPausePlay_X && p.x <= btnPausePlay_X + btnPause_Width &&\
 		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
 		;INVOKE InvalidateRect, NULL, NULL, FALSE
-		invoke jmpToLive
+		
+		mov game.state, LIVE
 	.endif
 	ret
 mouseDownPause ENDP
