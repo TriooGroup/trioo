@@ -68,6 +68,9 @@ hWhite dd ?
 hBlackPlank dd ?
 hHeart dd ?
 
+hFontScore dd ?
+hFontSpace dd ?
+
 BufferFilePath BYTE "pic\buffer.bmp", 0
 BackgroundFilePath BYTE "pic\trio_bg_with_pause_button.bmp", 0
 NormalPlankFilePath BYTE "pic\trio_key_white.bmp", 0
@@ -326,6 +329,16 @@ InitImage PROC
 	INVOKE LoadImage, NULL, ADDR btnHomePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hBitmap_btn_home, eax
 
+	score_Height = 35
+	invoke CreateFont,score_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFontScore, eax
+
+	space_Height = 20
+	invoke CreateFont,space_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
+                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
+	mov hFontSpace, eax
+
 	ret
 InitImage ENDP
 
@@ -545,12 +558,7 @@ DrawLives PROC USES eax, lives:DWORD
 	invoke BitBlt, hDC, 20, 20, HEART_WIDTH, HEART_HEIGHT, hMemDC, 0, 0, SRCPAINT
 
 	invoke SetBkMode, hDC, TRANSPARENT 
-
-	invoke CreateFont,35,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
-                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
-	mov hFont, eax
-	invoke SelectObject, hDC, hFont
-
+	invoke SelectObject, hDC, hFontScore
 	invoke IntToStr, game.lives
 	invoke SetTextColor, hDC, 0ffffffh
 	invoke StringLen, ADDR strBuffer
@@ -784,12 +792,7 @@ DrawScore PROC
 LOCAL bgColor:DWORD
 LOCAL textColor:DWORD
 	invoke SetBkMode, hDC, TRANSPARENT 
-
-	score_Height = 35
-	invoke CreateFont,score_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
-                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
-	mov hFont, eax
-	invoke SelectObject, hDC, hFont
+	invoke SelectObject, hDC, hFontScore
 
 	invoke IntToStr, game.score
 	invoke SetTextColor, hDC, 0ffffffh
@@ -799,13 +802,7 @@ LOCAL textColor:DWORD
 	invoke TextOut, hDC, 500, 20, ADDR scoreStr, eax
 
 	invoke SetBkMode, hDC, TRANSPARENT 
-
-	space_Height = 20
-	invoke CreateFont,space_Height,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
-                CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
-	mov hFont, eax
-	invoke SelectObject, hDC, hFont
-
+	invoke SelectObject, hDC, hFontSpace
 	invoke StringLen, ADDR spaceStr
 	invoke TextOut, hDC, 1030, 63, ADDR spaceStr, eax
 
