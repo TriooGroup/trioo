@@ -190,17 +190,13 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 					mov game.isActivated, eax
 					mov game.activeCountdown, MAX_COUNTDOWN
 				.ENDIF
-				.IF ((edx == 1) && (game.ball[edi].velocityX > 0)) || ((edx == 3) && (game.ball[edi].velocityX < 0))
-					mov ebx, game.ball[edi].speedType
-					mov eax, TYPE SpeedType
-					mul ebx
-					mov edx, eax
-					mov eax, speedTypes[edx].velocityYMax
-					mov game.ball[edi].velocityY, 0
-					sub game.ball[edi].velocityY, eax
-				.ELSE
-					neg game.ball[edi].velocityY
-				.ENDIF
+				mov ebx, game.ball[edi].speedType
+				mov eax, TYPE SpeedType
+				mul ebx
+				mov edx, eax
+				mov eax, speedTypes[edx].velocityYMax
+				mov game.ball[edi].velocityY, 0
+				sub game.ball[edi].velocityY, eax
 				mov eax, PLANK_Y - DIMETER
 				mov game.ball[edi].positionY, eax
 				add game.score, 1
@@ -308,7 +304,7 @@ stepHeart PROC USES eax ebx
 		mov eax, game.heartVelocity
 		add game.heartHeight, eax
 		mov eax, game.plankPosition
-		.IF game.heartHeight > PLANK_Y
+		.IF game.heartHeight > PLANK_Y - HEART_HEIGHT
 			.IF eax == game.heartPosition
 				add game.lives, 1
 			.ENDIF

@@ -514,15 +514,29 @@ DrawBackground PROC
 	ret
 DrawBackground ENDP
 
-DrawHeart PROC, pos_x:SDWORD, pos_y:SDWORD
+DrawHeart PROC, pos_x_index:SDWORD, pos_y:SDWORD
+LOCAL pos_x:DWORD
+	.IF pos_x_index == 0
+		ret
+	.ELSEIF pos_x_index == 1
+		mov pos_x, PLANK_X1
+	.ELSEIF pos_x_index == 2
+		mov pos_x, PLANK_X2
+	.ELSEIF pos_x_index == 3
+		mov pos_x, PLANK_X3
+	.ENDIF
+	add pos_x, PLANK_WIDTH/2 - HEART_WIDTH/2
 	invoke SelectObject, hMemDC, hHeart
-	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 54, 0, SRCAND
-	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 0, 0, SRCPAINT
+	invoke BitBlt, hDC, pos_x, pos_y, HEART_WIDTH, HEART_HEIGHT, hMemDC, HEART_WIDTH, 0, SRCAND
+	invoke BitBlt, hDC, pos_x, pos_y, HEART_WIDTH, HEART_HEIGHT, hMemDC, 0, 0, SRCPAINT
 	ret
 DrawHeart ENDP
 
-DrawLives PROC, lives:DWORD
-	invoke DrawHeart, 20, 20
+DrawLives PROC USES eax, lives:DWORD
+	invoke SelectObject, hMemDC, hHeart
+	invoke BitBlt, hDC, 20, 20, HEART_WIDTH, HEART_HEIGHT, hMemDC, HEART_WIDTH, 0, SRCAND
+	invoke BitBlt, hDC, 20, 20, HEART_WIDTH, HEART_HEIGHT, hMemDC, 0, 0, SRCPAINT
+
 	invoke SetBkMode, hDC, TRANSPARENT 
 
 	invoke CreateFont,35,0,0,0,FW_EXTRALIGHT,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
