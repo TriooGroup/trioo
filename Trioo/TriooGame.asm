@@ -257,7 +257,7 @@ stepExtraPlank PROC USES eax ebx
 						mov ebx, 3
 					.ENDIF
 					.IF ebx == 4
-						mov ebx, 0
+						mov ebx, 1
 					.ENDIF
 					mov game.extraPosition, ebx
 				.ELSE
