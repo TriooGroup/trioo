@@ -31,6 +31,8 @@ hDC dd ?
 hMemDC dd ?
 hFont dd ?
 
+hFontDead dd ?
+
 hBuffer dd ?
 hBackground dd ?
 hPlank dd ?
@@ -345,14 +347,17 @@ SAVE:
 				invoke playcrash
 				.IF game.lives == 0
 					invoke closeMusic
-					mov eax, game.score
-					.IF eax >= game.bestScore && eax != 0
-						invoke playbest
-					.ENDIF
+					
 				.ENDIF
 			.ELSEIF game.lives > edx
 				invoke playheart
 			.ENDIF 
+			.IF game.state == DEAD
+				mov eax, game.score
+				.IF eax >= game.bestScore && eax != 0
+					invoke playbest
+				.ENDIF
+			.ENDIF
 			invoke InvalidateRect, hWnd, NULL, FALSE		
 		.ENDIF
 		jmp WndProcExit
@@ -1110,8 +1115,8 @@ drawDeadScreen PROC USES eax,
 
 	invoke CreateFont,deadScore_Height,0,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
                 CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
-	mov hFont, eax
-	invoke SelectObject, hDC, hFont
+	mov hFontDead, eax
+	invoke SelectObject, hDC, hFontDead
 
 	invoke IntToStr, score
 	invoke SetTextColor, hDC, 0050bdf0h
@@ -1120,8 +1125,8 @@ drawDeadScreen PROC USES eax,
 
 	invoke CreateFont,best_Height,0,0,0,FW_DONTCARE,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_OUTLINE_PRECIS,\
                 CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY, VARIABLE_PITCH,addr fontStr
-	mov hFont, eax
-	invoke SelectObject, hDC, hFont
+	mov hFontDead, eax
+	invoke SelectObject, hDC, hFontDead
 	invoke SetTextColor, hDC, 004c48eeh
 	invoke StringLen, ADDR bestStr
 	invoke TextOut, hDC, best_X, best_Y, ADDR bestStr, eax
@@ -1130,6 +1135,7 @@ drawDeadScreen PROC USES eax,
 	invoke StringLen, ADDR strBuffer
 	invoke TextOut, hDC, bestScore_X, bestScore_Y, ADDR strBuffer, eax
 
+	invoke DeleteObject, hFontDead
 	ret
 drawDeadScreen ENDP
 
