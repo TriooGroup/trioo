@@ -342,7 +342,7 @@ InitImage ENDP
 
 
 WndProc PROC, lhwnd:DWORD, localMsg:DWORD, wParam:DWORD, lParam:DWORD
-LOCAL	ps:PAINTSTRUCT, pt:POINT	
+LOCAL	ps:PAINTSTRUCT, pt:POINT
 SAVE:
 	.IF localMsg == WM_CREATE
 		invoke jmpToOpening
@@ -363,6 +363,8 @@ SAVE:
 						invoke playbest
 					.ENDIF
 				.ENDIF
+			.ELSEIF game.lives > edx
+				invoke playheart
 			.ENDIF 
 			invoke InvalidateRect, hWnd, NULL, FALSE		
 		.ENDIF

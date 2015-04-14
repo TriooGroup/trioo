@@ -13,7 +13,7 @@ openCmd&param BYTE "open sound/&param.mp3 alias &param type mpegvideo",0
 playCmd&param BYTE "play &param repeat",0
 ENDM
 
-FOR param ,<boom, crash, failure, hit, jump, best>
+FOR param ,<boom, crash, failure, hit, heart, best>
 closeCmd&param BYTE "close &param", 0
 openCmd&param BYTE "open sound/&param.mp3 alias &param type mpegvideo",0
 playCmd&param BYTE "play &param",0
@@ -40,7 +40,7 @@ playBGM_02 PROC
 	ret
 playBGM_02 ENDP
 
-FOR param, <boom, crash, failure, hit, jump, best>
+FOR param, <boom, crash, failure, hit, heart, best>
 play&param PROC
 	.if gamesound.playSound == 1
 		invoke mciSendString,ADDR closeCmd&param, NULL, 0, 0	

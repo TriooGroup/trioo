@@ -54,7 +54,7 @@ L1:
 	loop L1
 startGame ENDP
 
-step PROC USES edi
+step PROC USES edi edx
 	.IF game.state != LIVE
 		ret
 	.ENDIF
