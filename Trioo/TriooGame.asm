@@ -159,11 +159,11 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 			.ELSE
 				mov edx, 3
 			.ENDIF
-			.IF (edx != game.extraPosition) && (edx != game.plankPosition) ;DEAD
+			.IF (edx != game.extraPosition || game.extraPlankState != 2) && (edx != game.plankPosition) ;DEAD
 				;mov game.state, DEAD
 				mov game.deadIndex, edi
 				mov game.deadCountdown, 44
-				mov game.ball[edi].positionY, PLANK_Y - RADIUS
+				mov game.ball[edi].positionY, PLANK_Y + 16 - DIMETER
 				mov eax, game.score
 				.IF eax > game.bestScore					
 					mov game.bestScore, eax
