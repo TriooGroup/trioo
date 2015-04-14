@@ -344,7 +344,7 @@ SAVE:
 				invoke playcrash
 				invoke closeMusic
 				mov eax, game.score
-				.IF eax == game.bestScore && eax != 0
+				.IF eax >= game.bestScore && eax != 0
 					invoke playbest
 				.ENDIF
 			.ENDIF 
@@ -553,7 +553,7 @@ LOCAL tempHandle:DWORD
 		invoke SelectObject, hMemDC, hPlank
 	.ENDIF
 
-	.IF game.activeCountdown == MAX_COUNTDOWN
+	.IF game.activeCountdown == MAX_COUNTDOWN || game.extraActiveCountdown == MAX_COUNTDOWN
 		invoke playhit
 	.ENDIF
 
@@ -949,7 +949,7 @@ mouseDownPause PROC USES eax,
 
 	.if p.x >= btnPauseReplay_X && p.x <= btnPauseReplay_X + btnPause_Width &&\
 		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
-		mov game.state, LIVE
+		invoke jmpToLive
 	.endif
 
 	.if p.x >= btnPauseHome_X && p.x <= btnPauseHome_X + btnPause_Width &&\
@@ -960,8 +960,8 @@ mouseDownPause PROC USES eax,
 
 	.if p.x >= btnPausePlay_X && p.x <= btnPausePlay_X + btnPause_Width &&\
 		p.y >= btnPause_Y && p.y <= btnPause_Y + btnPause_Height
-		;INVOKE InvalidateRect, NULL, NULL, FALSE
-		invoke jmpToLive
+		
+		mov game.state, LIVE
 	.endif
 	ret
 mouseDownPause ENDP
@@ -1072,7 +1072,7 @@ drawDeadScreen PROC USES eax,
 	bestScore:DWORD
 
 	mov eax, game.score
-	.if eax == game.bestScore && eax != 0
+	.if eax >= game.bestScore && eax != 0
 		mov eax, deadBgNum
 		.if eax == 0
 			invoke drawImg, hBitmap_bg_dead_congrat, 0, 0, SCREEN_X, SCREEN_Y
