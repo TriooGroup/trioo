@@ -458,6 +458,7 @@ DrawPlayingScreen PROC
 	invoke DrawExtraPlank
 	invoke DrawBalls, game.deadIndex
 	invoke DrawPlank
+	invoke DrawHeart, game.heartPosition, game.heartHeight
 	invoke DrawScore
 	invoke DrawLives, game.lives
 	ret
@@ -510,7 +511,7 @@ DrawBackground PROC
 	ret
 DrawBackground ENDP
 
-DrawHeart PROC, pos_x:DWORD, pos_y:DWORD
+DrawHeart PROC, pos_x:SDWORD, pos_y:SDWORD
 	invoke SelectObject, hMemDC, hHeart
 	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 54, 0, SRCAND
 	invoke BitBlt, hDC, pos_x, pos_y, 54, 45, hMemDC, 0, 0, SRCPAINT

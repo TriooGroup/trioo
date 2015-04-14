@@ -7,6 +7,7 @@ PUBLIC game
 generateBall PROTO
 moveOneBall PROTO, index:DWORD
 stepExtraPlank PROTO
+stepHeart PROTO
 
 SpeedType STRUCT
 	velocityX SDWORD ?
@@ -94,6 +95,7 @@ L3:
 	loop L3
 	sub game.nextBall, 1
 	invoke stepExtraPlank
+	invoke stepHeart
 	ret
 step ENDP
 
@@ -283,4 +285,31 @@ stepExtraPlank PROC USES eax ebx
 	.ENDIF
 	ret
 stepExtraPlank ENDP
+
+stepHeart PROC USES eax ebx
+	.IF game.heartPosition == 0
+		mov eax, 10000
+		call RandomRange
+		.IF eax < 1000
+			mov eax, 3
+			call RandomRange
+			add eax, 1
+			mov game.heartPosition, eax
+			mov game.heartHeight, -50
+			mov game.heartVelocity, 0
+		.ENDIF
+	.ELSE
+		add game.heartVelocity, 1
+		mov eax, game.heartVelocity
+		add game.heartHeight, eax
+		mov eax, game.plankPosition
+		.IF game.heartHeight > PLANK_Y
+			.IF eax == game.heartPosition
+				add game.lives, 1
+			.ENDIF
+				mov game.heartPosition, 0
+		.ENDIF
+	.ENDIF
+	ret
+stepHeart ENDP
 END

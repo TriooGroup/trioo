@@ -42,6 +42,9 @@ Game STRUCT
 	deadCountdown DWORD ?
 	deadIndex SDWORD ?
 	lives DWORD ?
+	heartPosition DWORD ?
+	heartHeight SDWORD ?
+	heartVelocity DWORD ?
 Game ENDS
 
 RED EQU 1
@@ -64,6 +67,8 @@ MAX_COUNTDOWN = 4
 EXTRA_PLANK_TIME = 200
 EXTRA_PLANK_ALERT_TIME = 50
 DEAD_ALERT_TIME = 50
+HEART_HEIGHT = 45
+HEART_WIDTH = 54
 startGame PROTO
 step PROTO 
 movePlank PROTO, position: DWORD
