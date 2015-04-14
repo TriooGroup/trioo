@@ -339,13 +339,16 @@ SAVE:
 			invoke stepDead
 			invoke InvalidateRect, hWnd, NULL, FALSE
 		.ELSEIF game.state == LIVE
+			mov edx, game.lives
 			invoke step
-			.IF game.state == DEAD
+			.IF game.lives < edx
 				invoke playcrash
-				invoke closeMusic
-				mov eax, game.score
-				.IF eax >= game.bestScore && eax != 0
-					invoke playbest
+				.IF game.lives == 0
+					invoke closeMusic
+					mov eax, game.score
+					.IF eax >= game.bestScore && eax != 0
+						invoke playbest
+					.ENDIF
 				.ENDIF
 			.ENDIF 
 			invoke InvalidateRect, hWnd, NULL, FALSE		

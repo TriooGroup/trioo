@@ -167,14 +167,19 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				.ENDIF
 				;ËÀÍö
 				;mov game.state, DEAD
-				mov game.deadIndex, edi
-				mov game.deadCountdown, 44
-				mov game.ball[edi].positionY, PLANK_Y + 8 - DIMETER
-				mov eax, game.score
-				.IF eax > game.bestScore					
-					mov game.bestScore, eax
+				sub game.lives, 1
+				.IF game.lives == 0
+					mov game.deadIndex, edi
+					mov game.deadCountdown, 44
+					mov game.ball[edi].positionY, PLANK_Y + 8 - DIMETER
+					mov eax, game.score
+					.IF eax > game.bestScore					
+						mov game.bestScore, eax
+					.ENDIF
+					ret
+				.ELSE
+					mov game.ball[edi].existed, 0
 				.ENDIF
-				ret
 			.ELSE
 				;·´µ¯Çò
 				.IF edx == game.extraPosition
