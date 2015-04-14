@@ -56,6 +56,7 @@ hHalo2Rotated dd ?
 hHalo2RotatedMedium dd ?
 hHalo2RotatedSmall dd ?
 hPauseCover dd ?
+hPauseCoverBottom dd ?
 hButtonMusic dd ?
 hButtonSound dd ?
 hButtonReplay dd ?
@@ -93,7 +94,8 @@ Halo2SmallFilePath BYTE "pic\halo_02_small.bmp", 0
 Halo2RotatedFilePath BYTE "pic\halo_022.bmp", 0
 Halo2RotatedMediumFilePath BYTE "pic\halo_022_medium.bmp", 0
 Halo2RotatedSmallFilePath BYTE "pic\halo_022_small.bmp", 0
-PauseCoverFilePath BYTE "pic\pause_cover2.bmp", 0
+PauseCoverFilePath BYTE "pic\pause_cover.bmp", 0
+PauseCoverBottomFilePath BYTE "pic\pause_cover_bottom.bmp", 0
 ButtonMusicFilePath BYTE "pic\trio_button_music.bmp", 0
 ButtonSoundFilePath BYTE "pic\trio_button_sound.bmp", 0
 ButtonReplayFilePath BYTE "pic\trio_button_replay.bmp", 0
@@ -291,6 +293,8 @@ InitImage PROC
 	mov hHalo2RotatedMedium, eax
 	invoke LoadImage, NULL, ADDR Halo2RotatedSmallFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hHalo2RotatedSmall, eax
+	invoke LoadImage, NULL, ADDR PauseCoverBottomFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+	mov hPauseCoverBottom, eax
 	invoke LoadImage, NULL, ADDR PauseCoverFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
 	mov hPauseCover, eax
 	invoke LoadImage, NULL, ADDR ButtonSoundFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
@@ -491,6 +495,8 @@ DrawPauseScreen PROC
 	invoke DrawPlayingScreen
 	invoke SelectObject, hMemDC, hPauseCover
 	invoke BitBlt, hDC, 0, 0, SCREEN_X, SCREEN_Y, hMemDC, 0, 0, SRCAND
+	invoke SelectObject, hMemDC, hPauseCoverBottom
+	invoke BitBlt, hDC, 0, SCREEN_Y-120, SCREEN_X, SCREEN_Y, hMemDC, 0, 0, SRCCOPY
 
 	invoke SelectObject, hMemDC, hButtonMusic
 	invoke BitBlt, hDC, PAUSE_POSITION0, 267, 84, 87, hMemDC, 0, 0, SRCPAINT
