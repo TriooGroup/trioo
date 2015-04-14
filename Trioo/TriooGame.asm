@@ -18,9 +18,9 @@ SpeedType ENDS
 .data	
 	diameter EQU 47
 	game Game <>
-	minIntervalArray DWORD 90, 60, 50, 30
-	maxIntervalArray DWORD 120, 90, 70, 50
-	levelUpScore DWORD 0, 15, 30, 45
+	minIntervalArray DWORD 70, 50, 30, 15
+	maxIntervalArray DWORD 100, 80, 50, 30
+	levelUpScore DWORD 0, 20, 40, 60
 	LEVEL_NUM = 4
 	PARA_NUM = 2
 	speedTypes SpeedType {7, 0, 27, 1}, {6, -5, 31, 1}
@@ -291,7 +291,7 @@ stepHeart PROC USES eax ebx
 	.IF game.heartPosition == 0
 		mov eax, 10000
 		call RandomRange
-		.IF eax < 1000
+		.IF eax < 10
 			mov eax, 3
 			call RandomRange
 			add eax, 1
