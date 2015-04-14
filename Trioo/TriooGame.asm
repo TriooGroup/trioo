@@ -17,10 +17,10 @@ SpeedType ENDS
 .data	
 	diameter EQU 47
 	game Game <>
-	minIntervalArray DWORD 50, 15, 10
-	maxIntervalArray DWORD 100, 50, 15
-	levelUpScore DWORD 0, 20, 30
-	LEVEL_NUM = 3
+	minIntervalArray DWORD 90, 60, 50, 30
+	maxIntervalArray DWORD 120, 90, 70, 50
+	levelUpScore DWORD 0, 15, 30, 45
+	LEVEL_NUM = 4
 	PARA_NUM = 2
 	speedTypes SpeedType {7, 0, 27, 1}, {6, -5, 31, 1}
 .code
@@ -163,7 +163,7 @@ moveOneBall PROC USES eax ebx edi edx, index: DWORD
 				;mov game.state, DEAD
 				mov game.deadIndex, edi
 				mov game.deadCountdown, 44
-				mov game.ball[edi].positionY, PLANK_Y + 16 - DIMETER
+				mov game.ball[edi].positionY, PLANK_Y + 8 - DIMETER
 				mov eax, game.score
 				.IF eax > game.bestScore					
 					mov game.bestScore, eax
@@ -225,7 +225,7 @@ stepExtraPlank PROC USES eax ebx
 	.IF game.extraPlankState == 0
 		mov eax, 10000
 		call RandomRange
-		.IF eax < 10
+		.IF eax < 20
 			mov eax, 3
 			call RandomRange
 			add eax, 1
